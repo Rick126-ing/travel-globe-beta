@@ -1414,62 +1414,6 @@ if (itemImage) {
         });
       });
 
-      // Marker bookingOptions - hotel prenotabili
-(trip.bookingOptions?.hotels || []).forEach((h, idx) => {
-  if (h.lat == null || h.lng == null) return;
-
-  pts.push({
-    id: 'booking-hotel:' + (h.id || idx) + ':' + h.lat + ':' + h.lng,
-    name: h.title || h.name || 'Hotel prenotabile',
-    kind: 'hotel',
-    kindLabel: 'Hotel prenotabile',
-    day: null,
-    city: h.city || null,
-    lat: Number(h.lat),
-    lng: Number(h.lng),
-    cost: h?.price?.amount ?? null,
-    currency: h?.price?.currency || trip?.summary?.budget?.currency || 'EUR',
-    countryLanguage: trip?.country?.language || null,
-    notes: h.notes || '',
-    livePrice: h?.price?.amount ?? null,
-    liveCurrency: h?.price?.currency || 'EUR',
-    bookingUrl: h.bookingUrl || null,
-    provider: h.provider || '',
-    rating: h.rating ?? null,
-    isBookingOption: true,
-    bookingType: 'hotel',
-    rawBooking: h
-  });
-});
-
-// Marker bookingOptions - attività / musei / parchi prenotabili
-(trip.bookingOptions?.activities || []).forEach((a, idx) => {
-  if (a.lat == null || a.lng == null) return;
-
-  pts.push({
-    id: 'booking-activity:' + (a.id || idx) + ':' + a.lat + ':' + a.lng,
-    name: a.title || a.name || 'Attività prenotabile',
-    kind: 'activity',
-    kindLabel: prettyKind(a.category || 'activity'),
-    day: null,
-    city: a.city || null,
-    lat: Number(a.lat),
-    lng: Number(a.lng),
-    cost: a?.price?.amount ?? null,
-    currency: a?.price?.currency || trip?.summary?.budget?.currency || 'EUR',
-    countryLanguage: trip?.country?.language || null,
-    notes: a.notes || '',
-    livePrice: a?.price?.amount ?? null,
-    liveCurrency: a?.price?.currency || 'EUR',
-    bookingUrl: a.bookingUrl || null,
-    provider: a.provider || '',
-    duration: a.duration || '',
-    category: a.category || '',
-    isBookingOption: true,
-    bookingType: 'activity',
-    rawBooking: a
-  });
-});
 
       const seen = new Set();
       return pts.filter(p => {
@@ -1480,9 +1424,7 @@ if (itemImage) {
     }
 
     function buildDaySequence(day) {
-      const pts = [].concat(tripPoints || []).filter(p =>
-  Number(p.day) === Number(day) && p.isBookingOption !== true
-);
+     const pts = [].concat(tripPoints || []).filter(p => Number(p.day) === Number(day));
       pts.sort((a, b) => {
         const ia = a.itemIndex != null ? a.itemIndex : 999;
         const ib = b.itemIndex != null ? b.itemIndex : 999;
@@ -1568,9 +1510,7 @@ if (itemImage) {
       tpDay.textContent = String(d);
       tpSlider.value = String(d);
 
-      const dayPoints = (tripPoints || []).filter(p =>
-  Number(p.day) === d || p.isBookingOption === true
-);
+      const dayPoints = (tripPoints || []).filter(p => Number(p.day) === d);
       currentSequence = buildDaySequence(d);
       currentSequenceIndex = 0;
 
@@ -2110,24 +2050,6 @@ function saveBookingOptionsToCurrentTrip(type, items) {
   currentTrip.bookingOptions[type] = items;
 
   window.currentTrip = currentTrip;
-  refreshTripPointsAfterBookingOptions();
-}
-
-function refreshTripPointsAfterBookingOptions() {
-  if (!currentTrip) return;
-
-  tripPoints = buildTripPoints(currentTrip);
-
-  const currentDay = playback?.currentDay || 1;
-
-  const visiblePoints = (tripPoints || []).filter(p =>
-    Number(p.day) === Number(currentDay) || p.isBookingOption === true
-  );
-
-  globe.pointsData(visiblePoints);
-
-  hudHint.textContent =
-    t('markers') + ': ' + visiblePoints.length + ' • ' + t('clickMarkerDetails');
 }
 
 function showBookingSummaryForTrip(trip, bookingNeeds, userText = "") {
@@ -2189,33 +2111,6 @@ function showBookingSummaryForTrip(trip, bookingNeeds, userText = "") {
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
-
-function selectBookingOption(type, itemId) {
-  if (!currentTrip || !currentTrip.bookingOptions) return;
-
-  const validTypes = ["hotels", "activities", "flights"];
-  if (!validTypes.includes(type)) return;
-
-  const list = currentTrip.bookingOptions[type];
-  if (!Array.isArray(list)) return;
-
-  currentTrip.bookingOptions[type] = list.map((item) => ({
-    ...item,
-    status: item.id === itemId ? "selected" : "suggested"
-  }));
-
-  window.currentTrip = currentTrip;
-
-  const selectedItem = currentTrip.bookingOptions[type].find(item => item.id === itemId);
-  const selectedTitle =
-    selectedItem?.title ||
-    selectedItem?.airline ||
-    selectedItem?.name ||
-    "opzione";
-
-  addMsg("ai", `✅ Ho selezionato: ${selectedTitle}`);
-}
-
 
     async function loadAndShowHotelsForTrip(trip) {
   try {
@@ -2526,38 +2421,21 @@ function showHotelCardsInChat(hotels) {
     notes.className = 'booking-card-notes';
     notes.textContent = hotel.notes || '';
 
-    const actions = document.createElement('div');
-actions.className = 'booking-card-actions';
+    const btn = document.createElement('button');
+    btn.className = 'booking-card-btn';
+    btn.type = 'button';
+    btn.textContent = 'Prenota';
 
-const selectBtn = document.createElement('button');
-selectBtn.className = 'booking-card-btn booking-card-select-btn';
-selectBtn.type = 'button';
-selectBtn.textContent = hotel.status === "selected" ? 'Selezionato' : 'Seleziona hotel';
+    btn.addEventListener('click', () => {
+      if (hotel.bookingUrl) {
+        window.open(hotel.bookingUrl, '_blank');
+      }
+    });
 
-selectBtn.addEventListener('click', () => {
-  selectBookingOption("hotels", hotel.id);
-  selectBtn.textContent = 'Selezionato';
-  selectBtn.classList.add('selected');
-});
-
-const btn = document.createElement('button');
-btn.className = 'booking-card-btn';
-btn.type = 'button';
-btn.textContent = 'Prenota';
-
-btn.addEventListener('click', () => {
-  if (hotel.bookingUrl) {
-    window.open(hotel.bookingUrl, '_blank');
-  }
-});
-
-actions.appendChild(selectBtn);
-actions.appendChild(btn);
-
-card.appendChild(cardTitle);
-card.appendChild(meta);
-card.appendChild(notes);
-card.appendChild(actions);
+    card.appendChild(cardTitle);
+    card.appendChild(meta);
+    card.appendChild(notes);
+    card.appendChild(btn);
 
     wrapper.appendChild(card);
   });
@@ -2610,38 +2488,21 @@ function showActivityCardsInChat(activities) {
     notes.className = 'booking-card-notes';
     notes.textContent = activity.notes || '';
 
-    const actions = document.createElement('div');
-actions.className = 'booking-card-actions';
+    const btn = document.createElement('button');
+    btn.className = 'booking-card-btn';
+    btn.type = 'button';
+    btn.textContent = 'Prenota';
 
-const selectBtn = document.createElement('button');
-selectBtn.className = 'booking-card-btn booking-card-select-btn';
-selectBtn.type = 'button';
-selectBtn.textContent = activity.status === "selected" ? 'Selezionata' : 'Seleziona attività';
+    btn.addEventListener('click', () => {
+      if (activity.bookingUrl) {
+        window.open(activity.bookingUrl, '_blank');
+      }
+    });
 
-selectBtn.addEventListener('click', () => {
-  selectBookingOption("activities", activity.id);
-  selectBtn.textContent = 'Selezionata';
-  selectBtn.classList.add('selected');
-});
-
-const btn = document.createElement('button');
-btn.className = 'booking-card-btn';
-btn.type = 'button';
-btn.textContent = 'Prenota';
-
-btn.addEventListener('click', () => {
-  if (activity.bookingUrl) {
-    window.open(activity.bookingUrl, '_blank');
-  }
-});
-
-actions.appendChild(selectBtn);
-actions.appendChild(btn);
-
-card.appendChild(cardTitle);
-card.appendChild(meta);
-card.appendChild(notes);
-card.appendChild(actions);
+    card.appendChild(cardTitle);
+    card.appendChild(meta);
+    card.appendChild(notes);
+    card.appendChild(btn);
 
     wrapper.appendChild(card);
   });
@@ -2694,39 +2555,24 @@ function showFlightCardsInChat(flights) {
     notes.className = 'booking-card-notes';
     notes.textContent = flight.notes || '';
 
-    const actions = document.createElement('div');
-actions.className = 'booking-card-actions';
+    const btn = document.createElement('button');
+    btn.className = 'booking-card-btn';
+    btn.type = 'button';
+    btn.textContent = 'Prenota volo';
 
-const selectBtn = document.createElement('button');
-selectBtn.className = 'booking-card-btn booking-card-select-btn';
-selectBtn.type = 'button';
-selectBtn.textContent = flight.status === "selected" ? 'Selezionato' : 'Seleziona volo';
+    btn.addEventListener('click', () => {
+      if (flight.bookingUrl) {
+        window.open(flight.bookingUrl, '_blank');
+      }
+    });
 
-selectBtn.addEventListener('click', () => {
-  selectBookingOption("flights", flight.id);
-  selectBtn.textContent = 'Selezionato';
-  selectBtn.classList.add('selected');
-});
+    card.appendChild(cardTitle);
+    card.appendChild(route);
+    card.appendChild(meta);
+    card.appendChild(notes);
+    card.appendChild(btn);
 
-const btn = document.createElement('button');
-btn.className = 'booking-card-btn';
-btn.type = 'button';
-btn.textContent = 'Prenota volo';
-
-btn.addEventListener('click', () => {
-  if (flight.bookingUrl) {
-    window.open(flight.bookingUrl, '_blank');
-  }
-});
-
-actions.appendChild(selectBtn);
-actions.appendChild(btn);
-
-card.appendChild(cardTitle);
-card.appendChild(route);
-card.appendChild(meta);
-card.appendChild(notes);
-card.appendChild(actions);
+    wrapper.appendChild(card);
   });
 
   div.appendChild(wrapper);
