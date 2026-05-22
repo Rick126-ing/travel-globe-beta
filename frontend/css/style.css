@@ -1,0 +1,3345 @@
+
+    html, body { margin:0; height:100%; overflow:hidden; background:#000; }
+    #globe { position:fixed; inset:0; }
+
+    :root{
+      --glass: rgba(6,10,18,0.58);
+      --line: rgba(255,255,255,0.12);
+      --shadow: 0 12px 34px rgba(0,0,0,0.38);
+      --radius: 12px;
+    }
+
+    body{
+      background:
+        radial-gradient(circle at 20% 20%, rgba(40,70,140,0.18), transparent 26%),
+        radial-gradient(circle at 80% 30%, rgba(255,180,0,0.10), transparent 24%),
+        radial-gradient(circle at 50% 80%, rgba(120,60,180,0.10), transparent 28%),
+        #000;
+    }
+
+    .btn{
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.10);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font: 14px/1 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
+    }
+    .btn:hover{
+      background: rgba(255,255,255,0.16);
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,0.26);
+    }
+    .btn:disabled{
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    #searchWrap{
+      position: fixed;
+      left: 16px;
+      top: 16px;
+      z-index: 20;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: var(--glass);
+      padding: 10px;
+      border-radius: var(--radius);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--line);
+      flex-wrap: wrap;
+    }
+
+    #countrySearch{
+      width: min(320px, calc(100vw - 260px));
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 10px;
+      outline: none;
+      font: 14px/1 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+    #countrySearch::placeholder{ color: rgba(255,255,255,0.7); }
+
+    #langSelect{
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.10);
+      color: #fff;
+      padding: 10px 10px;
+      border-radius: 10px;
+      font: 14px/1 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      outline: none;
+      cursor: pointer;
+    }
+    #langSelect option{
+      background: #111827;
+      color: #fff;
+    }
+
+    #chatWrap{
+      position: fixed;
+      left: 16px;
+      top: 72px;
+      z-index: 20;
+      width: min(520px, calc(100vw - 32px));
+      background: var(--glass);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    #chatHeader{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      color:#fff;
+      font: 14px/1 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+    }
+
+    #chatToggle{
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.10);
+      color:#fff;
+      padding: 6px 10px;
+      border-radius: 10px;
+      cursor:pointer;
+    }
+
+    #chatBody{ display:block; }
+
+    #chatMessages{
+      height: 320px;
+      overflow: auto;
+      padding: 10px 12px;
+      color: #fff;
+      font: 13px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      scroll-behavior: smooth;
+    }
+
+    .msg{
+      margin: 0 0 10px 0;
+      padding: 8px 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+    .msg.user{ background: rgba(80,140,220,0.18); }
+    .msg.ai{ background: rgba(255,255,255,0.06); }
+    .msg small{ display:block; opacity:0.75; margin-bottom:4px; }
+
+    .tripSummary{
+      margin: 0 0 12px 0;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      box-shadow: 0 10px 30px rgba(0,0,0,0.14);
+    }
+    .tripSummary h3{
+      margin: 0 0 8px 0;
+      font: 700 15px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    .metaLine{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      padding: 6px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      font-size: 12px;
+    }
+
+    .tripCard{
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+
+    .tripCard.active{
+      border-color: rgba(255,255,255,0.70);
+      background: rgba(255,255,255,0.14);
+      transform: translateY(-1px);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 10px 30px rgba(0,0,0,0.18);
+    }
+
+    .tripCard .title{
+      font-weight: 800;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .pill{
+      display:inline-flex;
+      gap: 6px;
+      align-items:center;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      font-size: 12px;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+
+    .tripItem{
+      padding: 8px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.12);
+      margin-top: 8px;
+      cursor: pointer;
+      transition: background .15s ease, transform .15s ease, border-color .15s ease;
+    }
+    .tripItem:hover{
+      background: rgba(255,255,255,0.08);
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,0.16);
+    }
+    .tripItem.active{
+      border-color: rgba(255,215,0,0.70);
+      background: rgba(255,215,0,0.10);
+      box-shadow: 0 0 0 1px rgba(255,215,0,0.14);
+    }
+
+    .tripItem .row{
+      display:flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 13px;
+    }
+
+    .tripItem .meta{
+      opacity: 0.75;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    #chatComposer{
+      display:flex;
+      gap: 8px;
+      padding: 10px 12px;
+      border-top: 1px solid rgba(255,255,255,0.10);
+    }
+
+    #chatInput{
+      flex: 1;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 10px;
+      outline: none;
+      font: 14px/1 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+    #chatInput::placeholder{ color: rgba(255,255,255,0.7); }
+    #chatInput:disabled{ opacity: 0.7; cursor: not-allowed; }
+
+    #tripPlayer{
+      position: fixed;
+      left: 16px;
+      z-index: 41;
+      display: none;
+      gap: 8px;
+      align-items: center;
+      background: var(--glass);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      color: #fff;
+      font: 13px/1 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      flex-wrap: wrap;
+    }
+
+    #tripPlayer .label{
+      opacity: 0.85;
+      font-weight: 700;
+    }
+
+    #tripPlayer .day{
+      font-weight: 900;
+      min-width: 24px;
+      text-align: center;
+    }
+
+    #tripPlayer .btnMini{
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.10);
+      color: #fff;
+      padding: 8px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    #tripPlayer input[type="range"]{ width: 170px; }
+
+    #hud {
+      position: fixed;
+      left: 16px;
+      bottom: 16px;
+      background: rgba(0,0,0,0.58);
+      color: #fff;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font: 14px/1.25 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      backdrop-filter: blur(10px);
+      max-width: min(520px, calc(100vw - 32px));
+      box-shadow: var(--shadow);
+      user-select: none;
+      pointer-events: none;
+      border: 1px solid rgba(255,255,255,0.10);
+      z-index: 18;
+    }
+
+    #hud h3 { margin:0 0 6px 0; font-size: 16px; font-weight: 650; }
+    #hud small { opacity: 0.9; }
+
+    #drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      height: 100%;
+      width: min(460px, 92vw);
+      transform: translateX(110%);
+      transition: transform 220ms ease;
+      z-index: 25;
+      background: rgba(10,10,12,0.90);
+      backdrop-filter: blur(12px);
+      border-left: 1px solid rgba(255,255,255,0.12);
+      box-shadow: -12px 0 40px rgba(0,0,0,0.45);
+      color: #fff;
+      font: 14px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+    }
+    #drawer.open { transform: translateX(0); }
+
+    #drawerHeader{
+      padding: 16px;
+      display:flex;
+      align-items:flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+    }
+
+    #drawerTitle{
+      font-size: 18px;
+      font-weight: 800;
+      margin: 0;
+      line-height: 1.15;
+    }
+
+    #drawerSub{
+      opacity: 0.85;
+      margin-top: 6px;
+      font-size: 13px;
+    }
+
+    #drawerClose{
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.10);
+      color: #fff;
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor:pointer;
+      height: 36px;
+    }
+
+    #drawerBody{
+      padding: 14px 16px 16px 16px;
+      overflow: auto;
+    }
+
+    .sectionTitle{
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      opacity: 0.85;
+      margin: 14px 0 10px 0;
+      text-transform: uppercase;
+    }
+
+    .kv{
+      display:flex;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .kv .k{ opacity: 0.75; }
+    .kv .v{ text-align:right; font-weight: 650; }
+
+    .actions{
+      display:flex;
+      gap: 10px;
+      padding-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    a.linkBtn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      text-decoration:none;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.10);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+
+    #menuWrap{
+      position: fixed;
+      right: 16px;
+      top: 16px;
+      z-index: 30;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    #menuBtn,
+    #userBtn{
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(0,0,0,0.55);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font: 14px/1 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      cursor: pointer;
+      user-select: none;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+    }
+
+    #userBtn{
+      font-size:16px;
+      padding: 10px;
+      width: 42px;
+      height: 42px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    #menuDropdown,
+    #userDropdown{
+      position: absolute;
+      top: 52px;
+      width: 240px;
+      background: rgba(10,10,12,0.88);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.55);
+      overflow: hidden;
+      display: none;
+    }
+
+    #menuDropdown{ right: 0; }
+    #userDropdown{ right: 54px; }
+    #menuDropdown.open,
+    #userDropdown.open{ display:block; }
+
+    .menuItem{
+      width: 100%;
+      text-align: left;
+      padding: 12px;
+      border: 0;
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      font: 14px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .menuItem:last-child{ border-bottom: 0; }
+
+    #legendWrap{
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 45;
+  background: var(--glass);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow);
+  color:#fff;
+  font: 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  min-width: 180px;
+  max-width: 220px;
+}
+
+#legendWrap h4{
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  opacity: .9;
+}
+
+.legendRow{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin: 6px 0;
+}
+
+.legendDot{
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  box-shadow: 0 0 10px rgba(255,255,255,0.14);
+}
+
+@media (max-width: 1024px){
+  #legendWrap{
+    right: 12px;
+    bottom: 12px;
+    min-width: 160px;
+    max-width: 190px;
+    padding: 9px 10px;
+    font-size: 11px;
+  }
+
+  #legendWrap h4{
+    font-size: 11px;
+    margin-bottom: 6px;
+  }
+
+  .legendRow{
+    gap: 7px;
+    margin: 5px 0;
+  }
+
+  .legendDot{
+    width: 9px;
+    height: 9px;
+  }
+}
+
+@media (max-width: 768px){
+  #legendWrap{
+    right: 10px;
+    bottom: 10px;
+    min-width: 145px;
+    max-width: 165px;
+    padding: 8px 9px;
+    font-size: 10.5px;
+    border-radius: 10px;
+  }
+
+  #legendWrap h4{
+    font-size: 10px;
+    margin-bottom: 5px;
+  }
+
+  .legendRow{
+    gap: 6px;
+    margin: 4px 0;
+  }
+
+  .legendDot{
+    width: 8px;
+    height: 8px;
+  }
+}
+
+@media (max-width: 560px){
+  #legendWrap{
+    right: 8px;
+    bottom: 8px;
+    min-width: 130px;
+    max-width: 145px;
+    padding: 7px 8px;
+    font-size: 10px;
+    opacity: 0.92;
+  }
+
+  #legendWrap h4{
+    font-size: 9px;
+    letter-spacing: .3px;
+  }
+
+  .legendRow span:last-child{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (max-width: 480px){
+  #legendWrap{
+    display: none;
+  }
+}
+
+    .legendRow{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin: 6px 0;
+    }
+
+    .legendDot{
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+      box-shadow: 0 0 10px rgba(255,255,255,0.14);
+    }
+
+    #loadingOverlay{
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.36);
+      backdrop-filter: blur(4px);
+      pointer-events: none;
+    }
+
+    .loadingCard{
+      min-width: 260px;
+      max-width: 340px;
+      background: rgba(8,12,22,0.78);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 18px 18px 16px 18px;
+      box-shadow: 0 18px 60px rgba(0,0,0,0.40);
+      color:#fff;
+      text-align:center;
+    }
+
+    .loadingCard h3{
+      margin: 0 0 8px 0;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .loadingCard p{
+      margin: 0 0 14px 0;
+      font-size: 13px;
+      opacity: .86;
+    }
+
+    .loadingBar{
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.10);
+      position: relative;
+    }
+
+    .loadingBar::before{
+      content: "";
+      position: absolute;
+      inset: 0;
+      width: 38%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(80,140,220,0.9), rgba(255,215,0,0.95));
+      animation: loadingMove 1.3s ease-in-out infinite;
+    }
+
+    @keyframes loadingMove{
+      0%{ transform: translateX(-110%); }
+      100%{ transform: translateX(290%); }
+    }
+
+    @media (max-width: 900px){
+      #chatWrap{ width:min(94vw, 520px); }
+      #tripPlayer{ width:min(94vw, 520px); }
+      #legendWrap{ right: 12px; bottom: 12px; }
+      #userDropdown{ right: 48px; width: 210px; }
+      #menuDropdown{ width: 210px; }
+      #countrySearch{ width:min(180px, calc(100vw - 260px)); }
+    }
+    @media (max-width: 1024px){
+  #searchWrap{
+    left: 12px;
+    top: 12px;
+    right: 12px;
+    width: auto;
+    max-width: none;
+    flex-wrap: wrap;
+  }
+
+  #countrySearch{
+    width: 100%;
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+
+  #chatWrap{
+    left: 12px;
+    top: 110px;
+    width: min(440px, calc(100vw - 24px));
+    max-height: 52vh;
+  }
+
+  #chatMessages{
+    height: 240px;
+  }
+
+  #tripPlayer{
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-width: 440px;
+  }
+
+  #menuWrap{
+    right: 12px;
+    top: 12px;
+  }
+
+  #legendWrap{
+    right: 12px;
+    bottom: 12px;
+    min-width: 160px;
+    max-width: 220px;
+  }
+
+  #hud{
+    left: 12px;
+    bottom: 12px;
+    max-width: min(420px, calc(100vw - 24px));
+  }
+
+  #drawer{
+    width: min(420px, 94vw);
+  }
+}
+
+@media (max-width: 768px){
+  #searchWrap{
+    gap: 6px;
+    padding: 8px;
+  }
+
+  #countrySearch{
+    width: 100%;
+    font-size: 13px;
+  }
+
+  #langSelect,
+  #btnGo,
+  #btnClear{
+    flex: 1 1 auto;
+    min-height: 40px;
+  }
+
+  #chatWrap{
+    top: 120px;
+    left: 10px;
+    width: calc(100vw - 20px);
+    max-height: 46vh;
+  }
+
+  #chatHeader{
+    padding: 9px 10px;
+    font-size: 13px;
+  }
+
+  #chatMessages{
+    height: 200px;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  #chatComposer{
+    padding: 8px 10px;
+    gap: 6px;
+  }
+
+  #chatInput{
+    font-size: 13px;
+    padding: 9px 10px;
+  }
+
+  #tripPlayer{
+    left: 10px;
+    right: 10px;
+    width: calc(100vw - 20px);
+    max-width: none;
+    padding: 8px;
+    gap: 6px;
+  }
+
+  #tripPlayer input[type="range"]{
+    width: 100%;
+    flex: 1 1 100%;
+  }
+
+  #hud{
+    left: 10px;
+    bottom: 10px;
+    padding: 10px 12px;
+    font-size: 12px;
+    max-width: calc(100vw - 20px);
+  }
+
+  #hud h3{
+    font-size: 14px;
+  }
+
+  #legendWrap{
+    right: 10px;
+    bottom: 10px;
+    min-width: 140px;
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+
+  #menuWrap{
+    right: 10px;
+    top: 10px;
+    gap: 6px;
+  }
+
+  #menuBtn,
+  #userBtn{
+    padding: 8px 10px;
+    min-height: 40px;
+  }
+
+  #menuDropdown,
+  #userDropdown{
+    top: 46px;
+    width: 190px;
+  }
+
+  #drawer{
+    width: 100vw;
+    max-width: 100vw;
+  }
+
+  #drawerHeader{
+    padding: 14px;
+  }
+
+  #drawerBody{
+    padding: 12px 14px 16px 14px;
+  }
+}
+
+@media (max-width: 480px){
+  #searchWrap{
+    left: 8px;
+    right: 8px;
+    top: 8px;
+    padding: 8px;
+    border-radius: 10px;
+  }
+
+  #countrySearch{
+    font-size: 12px;
+    padding: 9px 10px;
+  }
+
+  .btn{
+    font-size: 12px;
+    padding: 9px 10px;
+  }
+
+  #chatWrap{
+    left: 8px;
+    top: 118px;
+    width: calc(100vw - 16px);
+    border-radius: 10px;
+  }
+
+  #chatMessages{
+    height: 170px;
+  }
+
+  .tripSummary,
+  .tripCard{
+    padding: 9px;
+    border-radius: 12px;
+  }
+
+  .tripItem{
+    padding: 7px;
+  }
+
+  .tripItem .row{
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+  }
+
+  #tripPlayer{
+    left: 8px;
+    right: 8px;
+    width: calc(100vw - 16px);
+    border-radius: 10px;
+  }
+
+  #tripPlayer .btnMini{
+    padding: 7px 9px;
+  }
+
+  #hud{
+    left: 8px;
+    bottom: 8px;
+    width: calc(100vw - 16px);
+    max-width: calc(100vw - 16px);
+  }
+
+  #legendWrap{
+    display: none;
+  }
+
+  #menuWrap{
+    top: 8px;
+    right: 8px;
+  }
+
+  #drawerTitle{
+    font-size: 16px;
+  }
+
+  .kv{
+    gap: 8px;
+  }
+
+  .kv .v{
+    max-width: 52%;
+    word-break: break-word;
+  }
+}
+@media (max-width: 768px){
+
+  #chatWrap{
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    top: auto;
+    width: auto;
+    max-height: 50vh;
+    border-radius: 12px;
+  }
+
+  #chatBody{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  #chatMessages{
+    flex: 1;
+    height: auto;
+    overflow-y: auto;
+  }
+
+  #chatComposer{
+    display: flex;
+    gap: 6px;
+  }
+
+  #chatInput{
+    flex: 1;
+    min-height: 42px;
+  }
+
+  #chatSend{
+    min-width: 70px;
+  }
+}
+#savedTripsDrawer{
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: min(420px, 92vw);
+  transform: translateX(-110%);
+  transition: transform 220ms ease;
+  z-index: 55;
+  background: rgba(10,10,12,0.92);
+  backdrop-filter: blur(12px);
+  border-right: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 12px 0 40px rgba(0,0,0,0.45);
+  color: #fff;
+  font: 14px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+#savedTripsDrawer.open{
+  transform: translateX(0);
+}
+
+#savedTripsHeader{
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+
+#savedTripsTitle{
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+#savedTripsSub{
+  opacity: 0.85;
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+#savedTripsClose{
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.10);
+  color: #fff;
+  border-radius: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+  height: 36px;
+}
+
+#savedTripsClose:hover{
+  background: rgba(255,255,255,0.16);
+}
+
+#savedTripsBody{
+  padding: 14px 16px 16px 16px;
+  overflow: auto;
+}
+
+#savedTripsList{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.savedTripCard{
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  cursor: pointer;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+.savedTripCard:hover{
+  border-color: rgba(255,255,255,0.28);
+  background: rgba(255,255,255,0.10);
+  transform: translateY(-1px);
+}
+
+.savedTripCard .title{
+  font-weight: 800;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.savedTripMeta{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.savedTripEmpty{
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.05);
+  opacity: 0.9;
+}
+
+@media (max-width: 768px){
+  #savedTripsDrawer{
+    width: 100vw;
+    max-width: 100vw;
+  }
+
+  #savedTripsHeader{
+    padding: 14px;
+  }
+
+  #savedTripsBody{
+    padding: 12px 14px 16px 14px;
+  }
+}
+
+.authModal{
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(6px);
+  z-index: 80;
+  padding: 16px;
+}
+
+.authModal.open{
+  display: flex;
+}
+
+.authCard{
+  width: min(420px, 96vw);
+  background: rgba(10,10,12,0.94);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  color: #fff;
+  overflow: hidden;
+}
+
+.authHeader{
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+#authTitle{
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+#authSub{
+  margin-top: 4px;
+  font-size: 13px;
+  opacity: .82;
+}
+
+#authClose{
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  cursor: pointer;
+}
+
+.authTabs{
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px 0 16px;
+}
+
+.authTab{
+  flex: 1;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.authTab.active{
+  background: rgba(255,255,255,0.16);
+  border-color: rgba(255,255,255,0.24);
+}
+
+.authBody{
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.authLabel{
+  font-size: 13px;
+  opacity: .88;
+}
+
+.authInput{
+  width: 100%;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border-radius: 12px;
+  padding: 12px 14px;
+  outline: none;
+}
+
+.authInput::placeholder{
+  color: rgba(255,255,255,0.55);
+}
+
+.authMessage{
+  min-height: 20px;
+  font-size: 13px;
+  opacity: .95;
+}
+
+@media (max-width: 768px){
+  .authCard{
+    width: min(100vw - 20px, 420px);
+    border-radius: 14px;
+  }
+}
+
+.savedTripTopRow{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+  margin-bottom:8px;
+}
+
+.deleteTripBtn{
+  border:1px solid rgba(255,255,255,0.14);
+  background: rgba(255,80,80,0.16);
+  color:#fff;
+  border-radius:10px;
+  padding:6px 10px;
+  cursor:pointer;
+  font-size:12px;
+  flex: 0 0 auto;
+}
+
+.deleteTripBtn:hover{
+  background: rgba(255,80,80,0.26);
+  border-color: rgba(255,120,120,0.35);
+}
+.savedTripThumb{
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  display: block;
+}
+#drawerImage{
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 14px;
+  margin-bottom: 14px;
+  display: none;
+}
+.day-items {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.activity-card {
+  display: flex;
+  gap: 12px;
+  background: #ffffff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  cursor: pointer;
+}
+
+.activity-card img {
+  width: 110px;
+  height: 110px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.activity-content {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.activity-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.activity-time {
+  font-size: 12px;
+  color: #888;
+}
+
+.activity-notes {
+  font-size: 12px;
+  margin-top: 4px;
+  color: #555;
+}
+.tripItemImage{
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  display: block;
+}
+#drawerImageWrap {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  background: #111;
+}
+
+#drawerImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.tripItemCard{
+  overflow: hidden;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  margin-bottom: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  cursor: pointer;
+}
+
+.tripItemCard:hover{
+  border-color: rgba(255,215,0,0.45);
+  background: rgba(255,255,255,0.09);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+}
+
+.tripItemImage{
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  display: block;
+}
+#drawerImage,
+.tripItemImage{
+  transition: filter .3s ease;
+}
+.imgSkeleton{
+  background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.12) 37%, rgba(255,255,255,0.06) 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer{
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+#drawer{
+  z-index: 120;
+}
+
+#menuWrap{
+  z-index: 80;
+}
+@media (max-width: 768px){
+
+  #searchWrap{
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    width: auto;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  #countrySearch{
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  #chatWrap{
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    width: auto;
+    max-height: 48vh;
+  }
+
+  #chatMessages{
+    max-height: 32vh;
+    overflow-y: auto;
+  }
+
+  #chatComposer{
+    display: flex;
+    gap: 6px;
+  }
+
+  #chatInput{
+    min-width: 0;
+    flex: 1;
+  }
+
+  #saveTripBtn,
+  #chatSend{
+    flex: 0 0 auto;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  #tripPlayer{
+    left: 10px;
+    right: 10px;
+    width: auto;
+    bottom: 220px;
+    top: auto !important;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  #tpSlider{
+    width: 100%;
+  }
+
+  #drawer{
+    top: auto;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    max-height: 72vh;
+    border-radius: 18px 18px 0 0;
+    transform: translateY(110%);
+  }
+
+  #drawer.open{
+    transform: translateY(0);
+  }
+
+  #savedTripsDrawer{
+    width: 100%;
+    max-width: 100%;
+  }
+
+  #menuWrap{
+    top: 10px;
+    right: 10px;
+  }
+
+  #legendWrap,
+  #hud{
+    display: none;
+  }
+
+  .tripItemImage{
+    height: 130px;
+  }
+
+  #drawerImageWrap{
+    height: 190px;
+  }
+}
+@media (max-width: 768px){
+
+  body{
+    overflow: hidden;
+  }
+
+  #searchWrap{
+    top: 48px;
+    left: 12px;
+    right: 12px;
+    padding: 10px;
+    border-radius: 18px;
+  }
+
+  #countrySearch{
+    height: 44px;
+    font-size: 15px;
+  }
+
+  #langSelect,
+  #btnGo,
+  #btnClear{
+    height: 44px;
+    font-size: 15px;
+  }
+
+  #userBtn,
+  #menuBtn{
+    height: 44px;
+    min-width: 44px;
+    font-size: 18px;
+  }
+
+  #tripPlayer{
+    position: fixed !important;
+    left: 12px !important;
+    right: 12px !important;
+    top: 43vh !important;
+    bottom: auto !important;
+    width: auto !important;
+    padding: 10px;
+    border-radius: 16px;
+    gap: 8px;
+    z-index: 45;
+  }
+
+  #tripPlayer .label,
+  #tripPlayer .day{
+    font-size: 14px;
+  }
+
+  .btnMini{
+    width: 38px;
+    height: 38px;
+  }
+
+  #tpSlider{
+    width: 100%;
+    flex-basis: 100%;
+  }
+
+  #chatWrap{
+    position: fixed !important;
+    left: 12px !important;
+    right: 12px !important;
+    bottom: 12px !important;
+    top: auto !important;
+    width: auto !important;
+    max-height: 34vh !important;
+    z-index: 50;
+  }
+
+  #chatHeader{
+    min-height: 38px;
+  }
+
+  #chatMessages{
+    max-height: calc(34vh - 92px) !important;
+    overflow-y: auto;
+  }
+
+  #chatComposer{
+    display: grid !important;
+    grid-template-columns: 1fr auto auto;
+    gap: 6px;
+    padding: 8px;
+  }
+
+  #chatInput{
+    min-width: 0;
+    height: 40px;
+    font-size: 13px;
+  }
+
+  #saveTripBtn,
+  #chatSend{
+    height: 40px;
+    padding: 0 10px;
+    font-size: 13px;
+  }
+
+  .tripSummary{
+    padding: 12px;
+  }
+
+  .tripSummary h3{
+    font-size: 20px;
+  }
+
+  .badge{
+    font-size: 12px;
+    padding: 7px 9px;
+  }
+
+  .tripItemImage{
+    height: 120px;
+  }
+
+  #drawer{
+    z-index: 130;
+  }
+
+  #menuWrap{
+    z-index: 80;
+  }
+}
+#chatComposer{
+  position: sticky;
+  bottom: 0;
+  background: rgba(15,18,24,0.96);
+}
+@media (max-width: 768px){
+  body.chat-collapsed #tripPlayer{
+    top: auto !important;
+    bottom: 72px !important;
+  }
+}
+#voiceBtn {
+  min-width: 42px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+#voiceStatus {
+  font-size: 12px;
+  color: rgba(255,255,255,0.75);
+  padding: 4px 10px 0;
+  min-height: 18px;
+}
+#voiceStatusWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px 0;
+  min-height: 22px;
+}
+
+#voiceStatus {
+  font-size: 12px;
+  color: rgba(255,255,255,0.75);
+}
+
+#cancelVoiceSendBtn {
+  font-size: 11px;
+  padding: 3px 8px;
+}
+#voiceBtn.voice-listening {
+  animation: voicePulse 1s infinite;
+  box-shadow: 0 0 0 0 rgba(255, 80, 80, 0.75);
+  background: rgba(255, 80, 80, 0.95);
+}
+
+@keyframes voicePulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 80, 80, 0.75);
+  }
+
+  70% {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 10px rgba(255, 80, 80, 0);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 80, 80, 0);
+  }
+}
+#chatModeIndicator {
+  margin: 8px 10px 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1.2;
+  color: rgba(255,255,255,0.78);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  display: inline-flex;
+  width: fit-content;
+}
+#chatModeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 10px 6px;
+  flex-wrap: wrap;
+}
+
+#chatModeRow #chatModeIndicator {
+  margin: 0;
+}
+
+#newTripBtn {
+  font-size: 11px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+#chatModeIndicator.editing {
+  color: rgba(255,215,0,0.95);
+  background: rgba(255,215,0,0.12);
+  border-color: rgba(255,215,0,0.28);
+}
+#centerGlobeBtn {
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(10,14,24,0.72);
+  color: rgba(255,255,255,0.92);
+  border-radius: 999px;
+  padding: 8px 11px;
+  font-size: 13px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+#centerGlobeBtn:hover {
+  background: rgba(255,255,255,0.13);
+}
+@media (max-width: 768px) {
+  #centerGlobeBtn {
+    font-size: 12px;
+    padding: 7px 9px;
+  }
+}
+/* =========================================================
+   TRAVEL GLOBE - GRAFICA PIÙ BRILLANTE / APPARISCENTE
+   Da incollare IN FONDO al file style.css
+   Non modifica la logica e non dovrebbe sballare il layout
+========================================================= */
+
+:root {
+  --tg-cyan: #35e7ff;
+  --tg-blue: #4c7dff;
+  --tg-purple: #9b5cff;
+  --tg-pink: #ff4fd8;
+  --tg-gold: #ffd86b;
+  --tg-green: #35ffb0;
+  --tg-glass: rgba(8, 14, 32, 0.72);
+  --tg-glass-strong: rgba(8, 14, 32, 0.88);
+  --tg-border: rgba(255, 255, 255, 0.22);
+  --tg-shadow: 0 18px 55px rgba(0, 0, 0, 0.42);
+}
+
+/* Sfondo più cinematografico sopra il globo */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(53, 231, 255, 0.18), transparent 32%),
+    radial-gradient(circle at 82% 18%, rgba(155, 92, 255, 0.18), transparent 34%),
+    radial-gradient(circle at 60% 85%, rgba(255, 216, 107, 0.12), transparent 38%),
+    linear-gradient(90deg, rgba(0,0,0,0.55), transparent 28%, transparent 72%, rgba(0,0,0,0.55));
+}
+
+/* Tutti i pannelli principali diventano più premium */
+#searchWrap,
+#chatWrap,
+#tripPlayer,
+#hud,
+#legendWrap,
+#drawer,
+#savedTripsDrawer,
+.authCard,
+.loadingCard,
+#userDropdown,
+#menuDropdown {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.055)),
+    var(--tg-glass) !important;
+  border: 1px solid var(--tg-border) !important;
+  box-shadow:
+    var(--tg-shadow),
+    inset 0 1px 0 rgba(255,255,255,0.18) !important;
+  backdrop-filter: blur(18px) saturate(145%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(145%) !important;
+}
+
+/* Bordo neon leggero su chat e barra ricerca */
+#chatWrap,
+#searchWrap {
+  box-shadow:
+    0 0 0 1px rgba(53, 231, 255, 0.12),
+    0 0 35px rgba(53, 231, 255, 0.12),
+    0 22px 70px rgba(0, 0, 0, 0.48) !important;
+}
+
+/* Header chat più evidente */
+#chatHeader {
+  background:
+    linear-gradient(90deg, rgba(53,231,255,0.22), rgba(155,92,255,0.22), rgba(255,79,216,0.16)) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.20) !important;
+}
+
+#chatTitleText {
+  color: white !important;
+  text-shadow: 0 0 14px rgba(53,231,255,0.65);
+}
+
+#chatConnectedText {
+  color: var(--tg-green) !important;
+  text-shadow: 0 0 10px rgba(53,255,176,0.65);
+}
+
+/* Input più luminosi */
+#countrySearch,
+#chatInput,
+.authInput,
+#langSelect {
+  background: rgba(255,255,255,0.13) !important;
+  color: white !important;
+  border: 1px solid rgba(255,255,255,0.18) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.16),
+    0 8px 22px rgba(0,0,0,0.22) !important;
+}
+
+#countrySearch::placeholder,
+#chatInput::placeholder,
+.authInput::placeholder {
+  color: rgba(255,255,255,0.58) !important;
+}
+
+#countrySearch:focus,
+#chatInput:focus,
+.authInput:focus,
+#langSelect:focus {
+  border-color: rgba(53,231,255,0.85) !important;
+  box-shadow:
+    0 0 0 4px rgba(53,231,255,0.13),
+    0 0 28px rgba(53,231,255,0.22),
+    inset 0 1px 0 rgba(255,255,255,0.18) !important;
+}
+
+/* Bottoni più appariscenti */
+.btn,
+.btnMini,
+.linkBtn,
+#chatToggle,
+#drawerClose,
+#savedTripsClose,
+#authClose,
+#userBtn,
+#menuBtn,
+#centerGlobeBtn,
+.menuItem,
+.authTab,
+.deleteTripBtn {
+  color: white !important;
+  border: 1px solid rgba(255,255,255,0.22) !important;
+  background:
+    linear-gradient(135deg, rgba(53,231,255,0.26), rgba(155,92,255,0.24)),
+    rgba(255,255,255,0.09) !important;
+  box-shadow:
+    0 10px 24px rgba(0,0,0,0.28),
+    inset 0 1px 0 rgba(255,255,255,0.18) !important;
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    border-color 0.16s ease,
+    filter 0.16s ease !important;
+}
+
+.btn:hover,
+.btnMini:hover,
+.linkBtn:hover,
+#chatToggle:hover,
+#drawerClose:hover,
+#savedTripsClose:hover,
+#authClose:hover,
+#userBtn:hover,
+#menuBtn:hover,
+#centerGlobeBtn:hover,
+.menuItem:hover,
+.authTab:hover {
+  transform: translateY(-1px) scale(1.015);
+  filter: brightness(1.18);
+  border-color: rgba(53,231,255,0.75) !important;
+  box-shadow:
+    0 0 22px rgba(53,231,255,0.23),
+    0 14px 35px rgba(0,0,0,0.34),
+    inset 0 1px 0 rgba(255,255,255,0.22) !important;
+}
+
+/* Pulsanti principali ancora più forti */
+#chatSend,
+#btnGo,
+#saveTripBtn,
+#authSubmit {
+  background:
+    linear-gradient(135deg, var(--tg-cyan), var(--tg-blue), var(--tg-purple)) !important;
+  color: white !important;
+  font-weight: 800 !important;
+  border: 0 !important;
+  box-shadow:
+    0 0 22px rgba(53,231,255,0.26),
+    0 12px 30px rgba(0,0,0,0.34) !important;
+}
+
+/* Microfono quando ascolta */
+.voice-listening,
+#voiceBtn.voice-listening {
+  background:
+    radial-gradient(circle, rgba(255,79,216,0.85), rgba(155,92,255,0.7)) !important;
+  box-shadow:
+    0 0 0 6px rgba(255,79,216,0.13),
+    0 0 28px rgba(255,79,216,0.55) !important;
+  animation: tgPulse 1s infinite ease-in-out;
+}
+
+@keyframes tgPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.07); }
+  100% { transform: scale(1); }
+}
+
+/* Messaggi chat più belli */
+.msg {
+  border: 1px solid rgba(255,255,255,0.16) !important;
+  box-shadow:
+    0 12px 28px rgba(0,0,0,0.28),
+    inset 0 1px 0 rgba(255,255,255,0.12) !important;
+}
+
+.msg.ai {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06)) !important;
+}
+
+.msg.user {
+  background:
+    linear-gradient(135deg, rgba(53,231,255,0.38), rgba(155,92,255,0.34)) !important;
+  border-color: rgba(53,231,255,0.34) !important;
+}
+
+/* Card viaggio più accattivanti */
+.tripSummary,
+.tripCard,
+.savedTripCard {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.15), rgba(255,255,255,0.055)) !important;
+  border: 1px solid rgba(255,255,255,0.18) !important;
+  box-shadow:
+    0 14px 36px rgba(0,0,0,0.34),
+    inset 0 1px 0 rgba(255,255,255,0.14) !important;
+}
+
+.tripSummary h3,
+.tripCard .title,
+.savedTripCard .title,
+#drawerTitle,
+#savedTripsTitle,
+#authTitle {
+  color: white !important;
+  text-shadow: 0 0 16px rgba(53,231,255,0.26);
+}
+
+/* Giorno attivo più evidente */
+.tripCard.active,
+.tripItem.active {
+  border-color: rgba(255,216,107,0.8) !important;
+  box-shadow:
+    0 0 0 1px rgba(255,216,107,0.28),
+    0 0 24px rgba(255,216,107,0.18),
+    0 16px 38px rgba(0,0,0,0.36) !important;
+}
+
+/* Item del viaggio più “cliccabili” */
+.tripItemCard {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.11), rgba(255,255,255,0.045)) !important;
+  border: 1px solid rgba(255,255,255,0.14) !important;
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    border-color 0.16s ease,
+    background 0.16s ease !important;
+}
+
+.tripItemCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(53,231,255,0.55) !important;
+  background:
+    linear-gradient(135deg, rgba(53,231,255,0.16), rgba(155,92,255,0.12)) !important;
+  box-shadow:
+    0 0 22px rgba(53,231,255,0.14),
+    0 15px 34px rgba(0,0,0,0.34) !important;
+}
+
+/* Immagini più premium */
+.tripCard img,
+.tripItemImage,
+#drawerImage,
+.savedTripThumb {
+  filter: saturate(1.12) contrast(1.06);
+  box-shadow:
+    0 16px 32px rgba(0,0,0,0.38),
+    inset 0 1px 0 rgba(255,255,255,0.12) !important;
+}
+
+/* Badge/pill più luminosi */
+.badge,
+.pill {
+  background:
+    linear-gradient(135deg, rgba(53,231,255,0.16), rgba(255,255,255,0.08)) !important;
+  border: 1px solid rgba(255,255,255,0.16) !important;
+  color: rgba(255,255,255,0.9) !important;
+}
+
+/* Trip player più evidente */
+#tripPlayer {
+  box-shadow:
+    0 0 28px rgba(255,216,107,0.12),
+    0 16px 45px rgba(0,0,0,0.40) !important;
+}
+
+#tpDay {
+  background:
+    linear-gradient(135deg, var(--tg-gold), #ff9f43) !important;
+  color: #1b1200 !important;
+  box-shadow:
+    0 0 18px rgba(255,216,107,0.55),
+    0 8px 18px rgba(0,0,0,0.32) !important;
+}
+
+/* Slider più visibile */
+#tpSlider {
+  accent-color: var(--tg-gold);
+}
+
+/* HUD più leggibile e bello */
+#hudTitle {
+  color: white !important;
+  text-shadow: 0 0 16px rgba(53,231,255,0.45);
+}
+
+#hudHint {
+  color: rgba(255,255,255,0.72) !important;
+}
+
+/* Legenda più viva */
+.legendDot {
+  box-shadow:
+    0 0 10px currentColor,
+    0 0 20px currentColor !important;
+}
+
+/* Drawer dettagli più elegante */
+.kv {
+  border-bottom: 1px solid rgba(255,255,255,0.11) !important;
+}
+
+.kv .k {
+  color: rgba(255,255,255,0.52) !important;
+}
+
+.kv .v {
+  color: rgba(255,255,255,0.92) !important;
+}
+
+/* Loading più appariscente */
+.loadingBar {
+  background: rgba(255,255,255,0.13) !important;
+  overflow: hidden;
+}
+
+.loadingBar::before {
+  background:
+    linear-gradient(90deg, var(--tg-cyan), var(--tg-purple), var(--tg-pink), var(--tg-gold)) !important;
+  box-shadow: 0 0 22px rgba(53,231,255,0.55);
+}
+
+/* Effetto comparsa più gradevole */
+#chatWrap,
+#searchWrap,
+#hud,
+#legendWrap,
+#tripPlayer {
+  animation: tgFadeIn 0.42s ease both;
+}
+
+@keyframes tgFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Correzione: non alterare troppo la search bar centrata */
+#searchWrap {
+  animation-name: tgFadeInSearch;
+}
+
+@keyframes tgFadeInSearch {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Se su mobile la search non usa translateX, evita problemi */
+@media (max-width: 768px) {
+  #searchWrap {
+    animation-name: tgFadeIn;
+  }
+
+  @keyframes tgFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+/* =========================================================
+   FIX POSIZIONE BARRA RICERCA
+   Incollare in fondo al file style.css
+========================================================= */
+
+#searchWrap {
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  animation: none !important;
+}
+
+/* Mobile: mantiene la barra centrata e larga quasi tutto lo schermo */
+@media (max-width: 768px) {
+  #searchWrap {
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    transform: none !important;
+    animation: none !important;
+  }
+}
+/* =========================================================
+   ALLINEA CHAT CON IL LATO SINISTRO DELLA BARRA RICERCA
+   Incollare in fondo al file style.css
+========================================================= */
+
+#chatWrap {
+  left: calc(50% - 380px) !important;
+  top: 100px !important;
+}
+
+/* Se la barra ricerca è larga al massimo 760px,
+   380px è metà larghezza: quindi la chat parte dallo stesso bordo sinistro */
+
+/* Mobile: lascia la chat com'era, in basso */
+@media (max-width: 768px) {
+  #chatWrap {
+    left: 12px !important;
+    right: 12px !important;
+    top: auto !important;
+    bottom: 12px !important;
+  }
+}
+/* =========================================================
+   POSIZIONE CHAT NELLA ZONA SINISTRA LIBERA
+   Incollare in fondo al file style.css
+========================================================= */
+
+#chatWrap {
+  left: 24px !important;
+  top: 100px !important;
+  right: auto !important;
+}
+
+/* Mobile: lascia la chat in basso come prima */
+@media (max-width: 768px) {
+  #chatWrap {
+    left: 12px !important;
+    right: 12px !important;
+    top: auto !important;
+    bottom: 12px !important;
+  }
+}
+/* =========================================================
+   CHAT POCO PIÙ IN ALTO
+========================================================= */
+
+#chatWrap {
+  top: 15px !important;
+}
+/* =========================================================
+   FIX CHAT SINISTRA: PIÙ LUNGA + COLORE BASSO BLU
+   Incollare in fondo al file style.css
+========================================================= */
+
+#chatWrap {
+  left: 24px !important;
+  top: 15px !important;
+  width: 440px !important;
+
+  /* allunga la chat verso il basso */
+  height: calc(100vh - 170px) !important;
+  max-height: none !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(64, 88, 135, 0.92) 0%,
+      rgba(28, 45, 72, 0.90) 42%,
+      rgba(14, 31, 54, 0.94) 100%
+    ) !important;
+
+  border: 1px solid rgba(120, 180, 255, 0.35) !important;
+  box-shadow:
+    0 0 28px rgba(40, 150, 255, 0.18),
+    0 22px 65px rgba(0, 0, 0, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+}
+
+/* Il corpo della chat deve occupare tutto lo spazio disponibile */
+#chatBody {
+  height: calc(100% - 62px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(24, 42, 68, 0.76),
+      rgba(11, 28, 52, 0.92)
+    ) !important;
+}
+
+/* Area messaggi più alta, senza riquadro nero */
+#chatMessages {
+  flex: 1 1 auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(31, 51, 78, 0.45),
+      rgba(12, 30, 55, 0.82)
+    ) !important;
+}
+
+/* Barra input in basso blu, non nera */
+#chatComposer {
+  flex: 0 0 auto !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(29, 64, 105, 0.95),
+      rgba(19, 42, 78, 0.96)
+    ) !important;
+
+  border-top: 1px solid rgba(120, 180, 255, 0.22) !important;
+}
+
+/* Riga stato voce sotto input, sempre blu */
+#voiceStatusWrap {
+  flex: 0 0 auto !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(19, 42, 78, 0.96),
+      rgba(10, 28, 55, 0.96)
+    ) !important;
+}
+
+/* Mobile: non allungare troppo, resta comoda in basso */
+@media (max-width: 768px) {
+  #chatWrap {
+    left: 12px !important;
+    right: 12px !important;
+    top: auto !important;
+    bottom: 12px !important;
+    width: auto !important;
+    height: 52vh !important;
+    max-height: 52vh !important;
+  }
+}
+#chatWrap {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(28, 42, 72, 0.88) 0%,
+      rgba(15, 28, 52, 0.90) 48%,
+      rgba(8, 20, 42, 0.94) 100%
+    ) !important;
+}
+#chatHeader {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(53, 231, 255, 0.24),
+      rgba(120, 90, 255, 0.24),
+      rgba(255, 79, 216, 0.16)
+    ) !important;
+}
+/* =========================================================
+   FIX PULSANTE RIDUCI / APRI CHAT + SCROLLBAR CHAT
+   Incollare in fondo al file style.css
+========================================================= */
+
+/* Quando la chat è ridotta, forza davvero la chiusura del corpo */
+body.chat-collapsed #chatBody {
+  display: none !important;
+}
+
+/* Quando la chat è aperta, mantiene il layout corretto */
+body:not(.chat-collapsed) #chatBody {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Quando è ridotta, evita che la chat resti troppo alta */
+body.chat-collapsed #chatWrap {
+  height: auto !important;
+}
+
+/* Scrollbar della chat più coerente con il tema */
+#chatMessages::-webkit-scrollbar {
+  width: 9px;
+}
+
+#chatMessages::-webkit-scrollbar-track {
+  background: rgba(10, 24, 48, 0.55);
+  border-radius: 999px;
+}
+
+#chatMessages::-webkit-scrollbar-thumb {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(53, 231, 255, 0.85),
+      rgba(120, 90, 255, 0.85)
+    );
+  border-radius: 999px;
+  border: 2px solid rgba(10, 24, 48, 0.75);
+}
+
+#chatMessages::-webkit-scrollbar-thumb:hover {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 216, 107, 0.95),
+      rgba(53, 231, 255, 0.95)
+    );
+}
+
+/* Firefox */
+#chatMessages {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(53, 231, 255, 0.85) rgba(10, 24, 48, 0.55);
+}
+/* =========================================================
+   RESPONSIVE FINAL CLEAN
+   Mobile, telefoni piccoli, iPad/tablet
+   ========================================================= */
+
+
+/* =========================================================
+   MOBILE - TELEFONO
+   fino a 768px
+   ========================================================= */
+
+@media (max-width: 768px) {
+  html,
+  body {
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  #globe {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+  }
+
+  #searchWrap {
+    position: fixed !important;
+    top: calc(8px + env(safe-area-inset-top)) !important;
+    left: 8px !important;
+    right: 8px !important;
+    width: auto !important;
+    max-width: none !important;
+    padding: 8px !important;
+    display: grid !important;
+    grid-template-columns: 1fr 74px !important;
+    gap: 7px !important;
+    z-index: 70 !important;
+    border-radius: 18px !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  #countrySearch {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    height: 42px !important;
+    min-width: 0 !important;
+    font-size: 13px !important;
+    padding: 8px 11px !important;
+    box-sizing: border-box !important;
+  }
+
+  #langSelect {
+    grid-column: 1 / 2 !important;
+    width: 100% !important;
+    height: 36px !important;
+    font-size: 12px !important;
+  }
+
+  #btnGo {
+    grid-column: 2 / 3 !important;
+    width: 100% !important;
+    height: 36px !important;
+    font-size: 12px !important;
+    padding: 6px 8px !important;
+  }
+
+  #btnClear {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    height: 36px !important;
+    font-size: 12px !important;
+    padding: 6px 8px !important;
+  }
+
+  #chatWrap {
+    position: fixed !important;
+    left: 8px !important;
+    right: 8px !important;
+    top: auto !important;
+    bottom: calc(68px + env(safe-area-inset-bottom)) !important;
+    width: auto !important;
+    max-width: none !important;
+    height: 39vh !important;
+    max-height: 39vh !important;
+    z-index: 60 !important;
+    border-radius: 20px !important;
+    overflow: hidden !important;
+  }
+
+  #chatHeader {
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 8px 12px !important;
+    box-sizing: border-box !important;
+  }
+
+  #chatHeader strong {
+    font-size: 15px !important;
+  }
+
+  #chatConnectedText {
+    display: none !important;
+  }
+
+  #chatToggle {
+    height: 30px !important;
+    font-size: 12px !important;
+    padding: 5px 9px !important;
+  }
+
+  #chatBody {
+    height: calc(39vh - 44px) !important;
+    max-height: calc(39vh - 44px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  #chatModeRow {
+    margin: 7px 10px 5px !important;
+    padding: 0 !important;
+    display: flex !important;
+    gap: 6px !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+  }
+
+  #chatModeIndicator {
+    margin: 0 !important;
+    font-size: 11px !important;
+    padding: 5px 8px !important;
+    max-width: 100% !important;
+  }
+
+  #newTripBtn {
+    font-size: 10px !important;
+    height: 26px !important;
+    padding: 4px 7px !important;
+  }
+
+  #chatMessages {
+    flex: 1 1 auto !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 44px !important;
+    overflow-y: auto !important;
+    padding: 0 10px 7px !important;
+    box-sizing: border-box !important;
+  }
+
+  .msg {
+    font-size: 12px !important;
+    line-height: 1.3 !important;
+    padding: 7px 9px !important;
+    margin-bottom: 6px !important;
+    border-radius: 14px !important;
+  }
+
+  .msg small {
+    font-size: 10px !important;
+    margin-bottom: 2px !important;
+  }
+
+  #chatComposer {
+    flex: 0 0 auto !important;
+    height: 58px !important;
+    padding: 8px 10px !important;
+    box-sizing: border-box !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 42px 58px 58px !important;
+    grid-template-rows: 42px !important;
+    gap: 6px !important;
+    align-items: center !important;
+  }
+
+  #chatInput {
+    grid-column: 1 / 2 !important;
+    grid-row: 1 / 2 !important;
+    width: 100% !important;
+    height: 42px !important;
+    min-width: 0 !important;
+    font-size: 12px !important;
+    padding: 8px 10px !important;
+    border-radius: 14px !important;
+    box-sizing: border-box !important;
+  }
+
+  #voiceBtn {
+    grid-column: 2 / 3 !important;
+    grid-row: 1 / 2 !important;
+    width: 42px !important;
+    min-width: 42px !important;
+    height: 42px !important;
+    padding: 0 !important;
+    font-size: 15px !important;
+    border-radius: 14px !important;
+  }
+
+  #saveTripBtn {
+    grid-column: 3 / 4 !important;
+    grid-row: 1 / 2 !important;
+    width: 58px !important;
+    min-width: 58px !important;
+    height: 42px !important;
+    font-size: 11px !important;
+    padding: 6px 5px !important;
+    border-radius: 14px !important;
+  }
+
+  #chatSend {
+    grid-column: 4 / 5 !important;
+    grid-row: 1 / 2 !important;
+    width: 58px !important;
+    min-width: 58px !important;
+    height: 42px !important;
+    font-size: 11px !important;
+    padding: 6px 5px !important;
+    border-radius: 14px !important;
+  }
+
+  #voiceStatusWrap {
+    flex: 0 0 auto !important;
+    min-height: 18px !important;
+    padding: 0 10px 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+
+  #voiceStatus {
+    font-size: 10px !important;
+  }
+
+  #cancelVoiceSendBtn {
+    font-size: 10px !important;
+    height: 24px !important;
+    padding: 3px 7px !important;
+  }
+
+  #menuWrap {
+    position: fixed !important;
+    left: 8px !important;
+    right: 8px !important;
+    bottom: calc(10px + env(safe-area-inset-bottom)) !important;
+    top: auto !important;
+    width: auto !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: 7px !important;
+    z-index: 90 !important;
+    pointer-events: none !important;
+  }
+
+  #userBtn,
+  #centerGlobeBtn,
+  #menuBtn {
+    pointer-events: auto !important;
+    height: 42px !important;
+    border-radius: 999px !important;
+  }
+
+  #userBtn {
+    width: 42px !important;
+    min-width: 42px !important;
+    padding: 0 !important;
+    font-size: 15px !important;
+  }
+
+  #centerGlobeBtn {
+    width: 42px !important;
+    min-width: 42px !important;
+    padding: 0 !important;
+    font-size: 0 !important;
+  }
+
+  #centerGlobeBtn::before {
+    content: "🌍" !important;
+    font-size: 17px !important;
+  }
+
+  #menuBtn {
+    min-width: 94px !important;
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+  }
+
+  #userDropdown,
+  #menuDropdown {
+    top: auto !important;
+    bottom: 50px !important;
+    right: 0 !important;
+    z-index: 100 !important;
+  }
+
+  #tripPlayer {
+    position: fixed !important;
+    left: 8px !important;
+    right: 8px !important;
+    top: auto !important;
+    bottom: calc(62px + env(safe-area-inset-bottom)) !important;
+    width: auto !important;
+    max-width: none !important;
+    z-index: 65 !important;
+    padding: 7px !important;
+    gap: 5px !important;
+    flex-wrap: wrap !important;
+    border-radius: 16px !important;
+  }
+
+  #tripPlayer .label {
+    font-size: 10px !important;
+  }
+
+  .btnMini {
+    min-width: 30px !important;
+    height: 30px !important;
+    font-size: 12px !important;
+    padding: 4px 7px !important;
+  }
+
+  #tpSlider {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  #hud,
+  #legendWrap {
+    display: none !important;
+  }
+
+  #drawer,
+  #savedTripsDrawer {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    max-width: none !important;
+    height: 72vh !important;
+    max-height: 72vh !important;
+    border-radius: 22px 22px 0 0 !important;
+    transform: translateY(110%) !important;
+    transition: transform 0.28s ease !important;
+    z-index: 120 !important;
+    overflow: hidden !important;
+  }
+
+  #drawer.open,
+  #savedTripsDrawer.open {
+    transform: translateY(0) !important;
+  }
+
+  #drawerHeader,
+  #savedTripsHeader {
+    min-height: 78px !important;
+    padding: 14px 16px !important;
+    box-sizing: border-box !important;
+  }
+
+  #drawerBody,
+  #savedTripsBody {
+    height: calc(72vh - 78px) !important;
+    max-height: calc(72vh - 78px) !important;
+    overflow-y: auto !important;
+    padding: 14px 16px calc(18px + env(safe-area-inset-bottom)) !important;
+    box-sizing: border-box !important;
+  }
+
+  #drawerClose,
+  #savedTripsClose {
+    height: 42px !important;
+    padding: 8px 13px !important;
+    border-radius: 14px !important;
+    font-size: 13px !important;
+  }
+}
+
+
+/* =========================================================
+   VERY SMALL PHONES
+   fino a 430px
+   ========================================================= */
+
+@media (max-width: 430px) {
+  #searchWrap {
+    top: calc(6px + env(safe-area-inset-top)) !important;
+    left: 6px !important;
+    right: 6px !important;
+    padding: 7px !important;
+  }
+
+  #countrySearch {
+    height: 40px !important;
+    font-size: 12px !important;
+  }
+
+  #langSelect,
+  #btnGo,
+  #btnClear {
+    height: 34px !important;
+    font-size: 12px !important;
+  }
+
+  #chatWrap {
+    left: 6px !important;
+    right: 6px !important;
+    bottom: calc(68px + env(safe-area-inset-bottom)) !important;
+    height: 40vh !important;
+    max-height: 40vh !important;
+  }
+
+  #chatComposer {
+    height: 56px !important;
+    grid-template-columns: minmax(0, 1fr) 40px 52px 52px !important;
+    grid-template-rows: 40px !important;
+    gap: 5px !important;
+    padding: 8px !important;
+  }
+
+  #chatInput,
+  #voiceBtn,
+  #saveTripBtn,
+  #chatSend {
+    height: 40px !important;
+  }
+
+  #voiceBtn {
+    width: 40px !important;
+    min-width: 40px !important;
+  }
+
+  #saveTripBtn,
+  #chatSend {
+    width: 52px !important;
+    min-width: 52px !important;
+    font-size: 10px !important;
+  }
+
+  #menuWrap {
+    left: 6px !important;
+    right: 6px !important;
+    bottom: calc(8px + env(safe-area-inset-bottom)) !important;
+  }
+
+  #userBtn,
+  #centerGlobeBtn,
+  #menuBtn {
+    height: 40px !important;
+  }
+
+  #userBtn,
+  #centerGlobeBtn {
+    width: 40px !important;
+    min-width: 40px !important;
+  }
+
+  #menuBtn {
+    min-width: 88px !important;
+    font-size: 12px !important;
+  }
+}
+
+
+/* =========================================================
+   IPAD / TABLET
+   portrait e landscape largo
+   ========================================================= */
+
+@media (min-width: 769px) and (max-width: 1080px) {
+  html,
+  body {
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  #globe {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+  }
+
+  #chatWrap {
+    position: fixed !important;
+    left: 20px !important;
+    top: 150px !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: 405px !important;
+    max-width: 405px !important;
+    height: 52vh !important;
+    max-height: 52vh !important;
+    z-index: 60 !important;
+    border-radius: 22px !important;
+    overflow: hidden !important;
+  }
+
+  #chatHeader {
+    height: 48px !important;
+    min-height: 48px !important;
+    padding: 10px 14px !important;
+    box-sizing: border-box !important;
+  }
+
+  #chatHeader strong {
+    font-size: 16px !important;
+  }
+
+  #chatConnectedText {
+    display: inline !important;
+    font-size: 12px !important;
+  }
+
+  #chatToggle {
+    height: 32px !important;
+    font-size: 12px !important;
+    padding: 5px 10px !important;
+    border-radius: 14px !important;
+  }
+
+  #chatBody {
+    height: calc(52vh - 48px) !important;
+    max-height: calc(52vh - 48px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  #chatModeRow {
+    margin: 8px 12px 6px !important;
+    gap: 7px !important;
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+  }
+
+  #chatModeIndicator {
+    margin: 0 !important;
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+  }
+
+  #newTripBtn {
+    height: 28px !important;
+    font-size: 11px !important;
+    padding: 5px 9px !important;
+  }
+
+  #chatMessages {
+    flex: 1 1 auto !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 90px !important;
+    overflow-y: auto !important;
+    padding: 0 12px 8px !important;
+    box-sizing: border-box !important;
+  }
+
+  .msg {
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+    padding: 8px 10px !important;
+    margin-bottom: 7px !important;
+    border-radius: 14px !important;
+  }
+
+  .msg small {
+    font-size: 10px !important;
+    margin-bottom: 3px !important;
+  }
+
+  #chatComposer {
+    flex: 0 0 auto !important;
+    height: 56px !important;
+    padding: 8px 10px !important;
+    box-sizing: border-box !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 40px 58px 58px !important;
+    grid-template-rows: 40px !important;
+    gap: 6px !important;
+    align-items: center !important;
+  }
+
+  #chatInput {
+    grid-column: 1 / 2 !important;
+    width: 100% !important;
+    height: 40px !important;
+    min-width: 0 !important;
+    font-size: 13px !important;
+    padding: 8px 11px !important;
+    border-radius: 14px !important;
+    box-sizing: border-box !important;
+  }
+
+  #voiceBtn {
+    grid-column: 2 / 3 !important;
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    font-size: 15px !important;
+    border-radius: 14px !important;
+  }
+
+  #saveTripBtn {
+    grid-column: 3 / 4 !important;
+    width: 58px !important;
+    min-width: 58px !important;
+    height: 40px !important;
+    font-size: 11px !important;
+    padding: 6px 5px !important;
+    border-radius: 14px !important;
+  }
+
+  #chatSend {
+    grid-column: 4 / 5 !important;
+    width: 58px !important;
+    min-width: 58px !important;
+    height: 40px !important;
+    font-size: 11px !important;
+    padding: 6px 5px !important;
+    border-radius: 14px !important;
+  }
+
+  #voiceStatusWrap {
+    flex: 0 0 auto !important;
+    min-height: 22px !important;
+    padding: 0 12px 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+  }
+
+  #voiceStatus {
+    font-size: 11px !important;
+  }
+
+  #cancelVoiceSendBtn {
+    height: 24px !important;
+    font-size: 10px !important;
+    padding: 3px 8px !important;
+  }
+
+  #searchWrap {
+    position: fixed !important;
+    top: 150px !important;
+    left: 445px !important;
+    right: auto !important;
+    width: 560px !important;
+    max-width: 560px !important;
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 58px 58px 72px !important;
+    gap: 7px !important;
+    padding: 8px !important;
+    z-index: 75 !important;
+    border-radius: 20px !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  #countrySearch {
+    grid-column: 1 / 2 !important;
+    height: 38px !important;
+    font-size: 12px !important;
+    min-width: 0 !important;
+  }
+
+  #langSelect {
+    grid-column: 2 / 3 !important;
+    height: 38px !important;
+    font-size: 12px !important;
+  }
+
+  #btnGo {
+    grid-column: 3 / 4 !important;
+    height: 38px !important;
+    font-size: 12px !important;
+  }
+
+  #btnClear {
+    grid-column: 4 / 5 !important;
+    height: 38px !important;
+    font-size: 12px !important;
+  }
+
+  #menuWrap {
+    position: fixed !important;
+    top: 150px !important;
+    right: 18px !important;
+    left: auto !important;
+    bottom: auto !important;
+    z-index: 80 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    pointer-events: none !important;
+  }
+
+  #userBtn,
+  #centerGlobeBtn,
+  #menuBtn {
+    pointer-events: auto !important;
+    height: 38px !important;
+    border-radius: 999px !important;
+    font-size: 12px !important;
+  }
+
+  #userBtn {
+    width: 38px !important;
+    min-width: 38px !important;
+    padding: 0 !important;
+  }
+
+  #centerGlobeBtn {
+    min-width: 118px !important;
+    width: auto !important;
+    font-size: 12px !important;
+    padding: 8px 12px !important;
+  }
+
+  #centerGlobeBtn::before {
+    content: none !important;
+  }
+
+  #menuBtn {
+    min-width: 86px !important;
+    padding: 8px 12px !important;
+  }
+
+  #userDropdown,
+  #menuDropdown {
+    top: 50px !important;
+    bottom: auto !important;
+    right: 0 !important;
+    z-index: 100 !important;
+  }
+
+  #tripPlayer {
+    position: fixed !important;
+    left: 20px !important;
+    top: calc(150px + 52vh + 12px) !important;
+    bottom: auto !important;
+    width: 405px !important;
+    max-width: 405px !important;
+    z-index: 55 !important;
+    padding: 8px !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+    border-radius: 16px !important;
+  }
+
+  #tripPlayer .label {
+    font-size: 11px !important;
+  }
+
+  #tpSlider {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  #hud {
+    display: block !important;
+    position: fixed !important;
+    left: 20px !important;
+    bottom: 18px !important;
+    max-width: 405px !important;
+    z-index: 35 !important;
+  }
+
+  #legendWrap {
+    display: block !important;
+    position: fixed !important;
+    right: 18px !important;
+    bottom: 18px !important;
+    max-width: 220px !important;
+    z-index: 35 !important;
+  }
+
+  #drawer,
+  #savedTripsDrawer {
+    position: fixed !important;
+    top: 0 !important;
+    right: -430px !important;
+    left: auto !important;
+    bottom: 0 !important;
+    width: 430px !important;
+    max-width: 430px !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    transform: none !important;
+    transition: right 0.28s ease !important;
+    z-index: 120 !important;
+    overflow: hidden !important;
+  }
+
+  #drawer.open,
+  #savedTripsDrawer.open {
+    right: 0 !important;
+    transform: none !important;
+  }
+
+  #drawerHeader,
+  #savedTripsHeader {
+    min-height: 78px !important;
+    padding: 14px 16px !important;
+    box-sizing: border-box !important;
+  }
+
+  #drawerBody,
+  #savedTripsBody {
+    height: calc(100vh - 78px) !important;
+    max-height: calc(100vh - 78px) !important;
+    overflow-y: auto !important;
+    padding: 14px 16px 18px !important;
+    box-sizing: border-box !important;
+  }
+
+  #drawerImage,
+  #drawerImageWrap img {
+    max-height: 210px !important;
+    object-fit: cover !important;
+  }
+}
+/* =========================================================
+   IPAD LANDSCAPE MICRO TWEAK
+   Sposta leggermente la search a destra e la rende più pulita
+   ========================================================= */
+
+@media (min-width: 769px) and (max-width: 1500px) {
+  #searchWrap {
+    left: 470px !important;
+    width: 520px !important;
+    max-width: 520px !important;
+  }
+
+  #chatWrap {
+    width: 400px !important;
+    max-width: 400px !important;
+  }
+
+  #tripPlayer {
+    width: 400px !important;
+    max-width: 400px !important;
+  }
+
+  #hud {
+    max-width: 400px !important;
+  }
+}
+/* =========================================================
+   IPAD LANDSCAPE - CENTRA SEARCH NELLO SPAZIO LIBERO
+   ========================================================= */
+
+@media (min-width: 769px) and (max-width: 1500px) {
+  #searchWrap {
+    left: 50% !important;
+    transform: translateX(-40%) !important;
+    width: 520px !important;
+    max-width: 520px !important;
+  }
+}
+.booking-results {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.booking-results-title {
+  font-weight: 800;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.booking-card {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(10, 20, 35, 0.72);
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+}
+
+.booking-card-title {
+  font-weight: 800;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.booking-card-meta {
+  font-size: 13px;
+  opacity: 0.9;
+  margin-bottom: 6px;
+}
+
+.booking-card-notes {
+  font-size: 12px;
+  line-height: 1.35;
+  opacity: 0.78;
+  margin-bottom: 10px;
+}
+
+.booking-card-btn {
+  width: 100%;
+  border: 0;
+  border-radius: 999px;
+  padding: 9px 12px;
+  font-weight: 800;
+  cursor: pointer;
+  color: white;
+  background: linear-gradient(135deg, #1d9bf0, #7c3aed);
+}
+
+.booking-card-btn:hover {
+  filter: brightness(1.08);
+}
+.booking-card-activity {
+  border-color: rgba(155, 92, 255, 0.28);
+}
+
+.booking-results-activities .booking-results-title {
+  color: rgba(255, 255, 255, 0.94);
+}
+.booking-card-flight {
+  border-color: rgba(80, 180, 255, 0.28);
+}
+
+.booking-results-flights .booking-results-title {
+  color: rgba(255, 255, 255, 0.94);
+}
+.booking-summary-card {
+  margin-top: 8px;
+  padding: 12px 13px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(8, 18, 32, 0.72);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+}
+
+.booking-summary-title {
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  opacity: 0.95;
+}
+
+.booking-summary-list {
+  display: grid;
+  gap: 6px;
+}
+
+.booking-summary-row {
+  font-size: 13px;
+  line-height: 1.35;
+  opacity: 0.9;
+}
+.booking-card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.booking-card-select-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.booking-card-select-btn.selected {
+  background: rgba(0, 200, 120, 0.28);
+  border-color: rgba(0, 200, 120, 0.55);
+}

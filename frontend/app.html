@@ -1,0 +1,3006 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Travel Globe</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <div id="globe"></div>
+
+  <div id="searchWrap">
+    <input id="countrySearch" list="countriesList" placeholder="Cerca un paese (es. Italia) e premi Invio…" />
+    <datalist id="countriesList"></datalist>
+
+    <select id="langSelect" aria-label="Language selector">
+      <option value="it">IT</option>
+      <option value="en">EN</option>
+      <option value="es">ES</option>
+      <option value="fr">FR</option>
+      <option value="de">DE</option>
+    </select>
+
+    <button id="btnGo" class="btn" type="button">Vai</button>
+    <button id="btnClear" class="btn" type="button">Reset</button>
+  </div>
+
+  <div id="chatWrap">
+    <div id="chatHeader">
+      <div><strong id="chatTitleText">Chat IA</strong> <span id="chatConnectedText" style="opacity:.75;">(collegata al backend)</span></div>
+      <button id="chatToggle" type="button">Riduci</button>
+    </div>
+
+    <div id="chatBody">
+      <div id="chatModeRow">
+  <div id="chatModeIndicator">Modalità: Nuovo viaggio</div>
+  <button id="newTripBtn" class="btnMini" type="button" style="display:none;">Nuovo viaggio</button>
+</div>
+
+<div id="chatMessages"></div>
+      <div id="chatComposer">
+        <input id="chatInput" placeholder="Esempio: 'Descrivi il tuo viaggio ideale'">
+        <button id="voiceBtn" class="btn" type="button" title="Comando vocale">🎤</button>
+        <button id="saveTripBtn" class="btn" type="button">Salva</button>
+        <button id="chatSend" class="btn" type="button">Invia</button>
+      </div>
+
+      <div id="voiceStatusWrap">
+        <span id="voiceStatus"></span>
+        <button id="cancelVoiceSendBtn" class="btnMini" type="button" style="display:none;">Annulla</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tripPlayer">
+    <span class="label" id="tripLabel">Viaggio</span>
+    <button class="btnMini" id="tpPrev" type="button">⟵</button>
+    <button class="btnMini" id="tpPlay" type="button">▶</button>
+    <button class="btnMini" id="tpPause" type="button">⏸</button>
+    <button class="btnMini" id="tpNext" type="button">⟶</button>
+    <span class="label" id="dayLabel">Giorno</span>
+    <span class="day" id="tpDay">—</span>
+    <input id="tpSlider" type="range" min="1" max="7" value="1" />
+  </div>
+
+  <div id="menuWrap">
+  <button id="userBtn" type="button" aria-label="Account utente">👤</button>
+  <button id="centerGlobeBtn" type="button">🌍 Centra globo</button>
+  <button id="menuBtn" type="button">☰ Menu</button>
+
+  <div id="userDropdown" role="menu" aria-label="Menu utente">
+    <button class="menuItem" id="uProfile" type="button">Profilo</button>
+    <button class="menuItem" id="uTrips" type="button">I miei viaggi</button>
+    <button class="menuItem" id="uLogin" type="button">Accedi</button>
+  </div>
+
+  <div id="menuDropdown" role="menu" aria-label="Menu principale">
+    <button class="menuItem" type="button" disabled style="opacity:.55; cursor:not-allowed;">Altre opzioni presto</button>
+  </div>
+</div>
+
+  <div id="hud">
+    <h3 id="hudTitle">Globo pronto</h3>
+    <small id="hudHint">Trascina per ruotare • Scroll per zoom • Click marker per dettagli</small>
+  </div>
+
+  <div id="legendWrap">
+    <h4 id="legendTitle">Legenda</h4>
+    <div class="legendRow"><span class="legendDot" style="background: rgba(255,255,255,0.96);"></span><span id="legendHotel">Hotel</span></div>
+    <div class="legendRow"><span class="legendDot" style="background: rgba(80,140,220,0.96);"></span><span id="legendPlace">Luogo</span></div>
+    <div class="legendRow"><span class="legendDot" style="background: rgba(255,165,0,0.96);"></span><span id="legendRestaurant">Ristorante</span></div>
+    <div class="legendRow"><span class="legendDot" style="background: rgba(170,120,255,0.96);"></span><span id="legendActivity">Attività</span></div>
+    <div class="legendRow"><span class="legendDot" style="background: rgba(0,200,120,0.96);"></span><span id="legendTransport">Spostamento</span></div>
+    <div class="legendRow"><span class="legendDot" style="background: rgba(255,215,0,1);"></span><span id="legendActivePoint">Punto attivo</span></div>
+  </div>
+
+  <div id="loadingOverlay">
+    <div class="loadingCard">
+      <h3 id="loadingTitle">Sto preparando il viaggio</h3>
+      <p id="loadingText">Genero l’itinerario e sincronizzo chat, globo e percorso.</p>
+      <div class="loadingBar"></div>
+    </div>
+  </div>
+
+  <aside id="drawer" aria-label="Dettagli luogo">
+    <div id="drawerHeader">
+      <div>
+        <div id="drawerTitle">Luogo</div>
+        <div id="drawerSub">Click su un marker per aprire i dettagli</div>
+      </div>
+      <button id="drawerClose" type="button">Chiudi</button>
+    </div>
+
+    <div id="drawerBody">
+      <div id="drawerImageWrap">
+  <img id="drawerImage" alt="Immagine luogo" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+</div>
+      <div class="sectionTitle" id="detailsTitle">Dettagli</div>
+      <div class="kv"><div class="k" id="labelType">Tipo</div><div class="v" id="dType">—</div></div>
+      <div class="kv"><div class="k" id="labelDay">Giorno</div><div class="v" id="dDay">—</div></div>
+      <div class="kv"><div class="k" id="labelCity">Città</div><div class="v" id="dCity">—</div></div>
+      <div class="kv"><div class="k" id="labelEstimatedCost">Costo stimato</div><div class="v" id="dCost">—</div></div>
+      <div class="kv"><div class="k" id="labelNotes">Note</div><div class="v" id="dNotes">—</div></div>
+      <div class="kv"><div class="k" id="labelLiveHotelPrice">Prezzo hotel live</div><div class="v" id="dLivePrice">—</div></div>
+      <div class="kv"><div class="k" id="labelCountryLanguage">Lingua del paese</div><div class="v" id="dCountryLanguage">—</div></div>
+      <div class="kv"><div class="k" id="labelCurrency">Valuta</div><div class="v" id="dCurrency">—</div></div>
+
+      <div class="actions">
+        <a class="linkBtn" id="dMaps" href="#" target="_blank" rel="noopener">Apri su Maps</a>
+        <a class="linkBtn" id="dWiki" href="#" target="_blank" rel="noopener">Wikipedia</a>
+        <a class="linkBtn" id="dBooking" href="#" target="_blank" rel="noopener" style="display:none;">Apri offerta hotel</a>
+      </div>
+    </div>
+  </aside>
+
+  <aside id="savedTripsDrawer" aria-label="I miei viaggi salvati">
+    <div id="savedTripsHeader">
+      <div>
+        <div id="savedTripsTitle">I miei viaggi</div>
+        <div id="savedTripsSub">Seleziona un viaggio salvato</div>
+      </div>
+      <button id="savedTripsClose" type="button">Chiudi</button>
+    </div>
+    <div id="savedTripsBody">
+      <div id="savedTripsList"></div>
+    </div>
+  </aside>
+
+  <div id="authModal" class="authModal">
+    <div class="authCard">
+      <div class="authHeader">
+        <div>
+          <div id="authTitle">Account</div>
+          <div id="authSub">Accedi o registrati</div>
+        </div>
+        <button id="authClose" type="button">✕</button>
+      </div>
+
+      <div class="authTabs">
+        <button id="tabLogin" class="authTab active" type="button">Login</button>
+        <button id="tabRegister" class="authTab" type="button">Registrazione</button>
+      </div>
+
+      <div class="authBody">
+        <label class="authLabel" for="authEmail">Email</label>
+        <input id="authEmail" class="authInput" type="email" placeholder="esempio@email.com" />
+
+        <label class="authLabel" for="authPassword">Password</label>
+        <input id="authPassword" class="authInput" type="password" placeholder="Inserisci password" />
+
+        <div id="authMessage" class="authMessage"></div>
+
+        <button id="authSubmit" class="btn" type="button">Accedi</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://unpkg.com/globe.gl"></script>
+
+  <script>
+    const API_BASE_URL = "https://travel-globe-7bjg.onrender.com";
+
+    let CURRENT_USER_ID = localStorage.getItem("userId") || null;
+    let CURRENT_USER_EMAIL = localStorage.getItem("userEmail") || null;
+    let authMode = "login";
+
+    let isSending = false;
+    let currentLang = localStorage.getItem('siteLang') || 'it';
+    
+    let voiceSendTimer = null;
+    const VOICE_SEND_DELAY_MS = 5000;
+
+    const translations = {
+      it: {
+        chatTitle: "Chat IA",
+        chatConnected: "(collegata al backend)",
+        reduce: "Riduci",
+        open: "Apri",
+        searchPlaceholder: "Cerca un paese (es. Italia) e premi Invio…",
+        chatPlaceholder: "Esempio: 'Fammi un viaggio 5 giorni in Italia, cultura e cibo'",
+        go: "Vai",
+        reset: "Reset",
+        send: "Invia",
+        voice: "Voce",
+        voiceNotSupported: "Comando vocale non supportato da questo browser.",
+        voiceListening: "Sto ascoltando...",
+        voiceRecognized: "Hai detto",
+        voiceError: "Errore nel riconoscimento vocale.",
+        loadingTitle: "Sto preparando il viaggio",
+        loadingText: "Genero l’itinerario e sincronizzo chat, globo e percorso.",
+        details: "Dettagli",
+        type: "Tipo",
+        day: "Giorno",
+        city: "Città",
+        estimatedCost: "Costo stimato",
+        notes: "Note",
+        liveHotelPrice: "Prezzo hotel live",
+        countryLanguage: "Lingua del paese",
+        currency: "Valuta",
+        openMaps: "Apri su Maps",
+        wikipedia: "Wikipedia",
+        openHotelOffer: "Apri offerta hotel",
+        legend: "Legenda",
+        hotel: "Hotel",
+        place: "Luogo",
+        restaurant: "Ristorante",
+        activity: "Attività",
+        transport: "Spostamento",
+        activePoint: "Punto attivo",
+        trip: "Viaggio",
+        profile: "Profilo",
+        myTrips: "I miei viaggi",
+        login: "Accedi",
+        centerGlobe: "Centra globo",
+        resetTrip: "Reset viaggio",
+        close: "Chiudi",
+        globeReady: "Globo pronto",
+        hudHintDefault: "Trascina per ruotare • Scroll per zoom • Click marker per dettagli",
+        clickForZoom: "Click per zoom",
+        zoomOnCountry: "Zoom sulla nazione",
+        noCountryFound: "Nessun paese trovato",
+        tripReset: "🔄 Viaggio resettato. Chiedimi un nuovo itinerario.",
+        tripInvalid: "❌ Itinerario non valido o vuoto.",
+        generatingTrip: "Sto generando il viaggio…",
+        backendDown: "❌ Non riesco a raggiungere il server del viaggio.",
+        tripGenericError: "❌ Non riesco a generare il viaggio in questo momento.",
+        tripInvalidServer: "❌ Risposta incompleta dal server.",
+        welcome: "Ciao! Scrivimi come vorresti il tuo viaggio.",
+        destination: "Destinazione",
+        duration: "Durata",
+        estimatedBudget: "Budget stimato",
+        markers: "Marker",
+        clickMarkerDetails: "Click marker per dettagli",
+        points: "Punti",
+        playToStart: "Play per riprodurre",
+        clickForDetails: "Click per dettagli",
+        language: "Lingua",
+        noSavedTrips: "Non ci sono ancora viaggi salvati.",
+        savedTripsTitle: "I miei viaggi",
+        savedTripsSub: "Seleziona un viaggio salvato",
+        reopenedTrip: "Hai riaperto"
+      }
+    };
+
+    function t(key) {
+      return translations[currentLang]?.[key] || translations.it?.[key] || key;
+    }
+
+    const searchInput = document.getElementById('countrySearch');
+    const countriesList = document.getElementById('countriesList');
+    const btnGo = document.getElementById('btnGo');
+    const btnClear = document.getElementById('btnClear');
+    const langSelect = document.getElementById('langSelect');
+    langSelect.value = currentLang;
+
+    const chatWrap = document.getElementById('chatWrap');
+    const chatBody = document.getElementById('chatBody');
+    const chatToggle = document.getElementById('chatToggle');
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const newTripBtn = document.getElementById('newTripBtn');
+    const chatModeIndicator = document.getElementById('chatModeIndicator');
+    const chatSend = document.getElementById('chatSend');
+    const saveTripBtn = document.getElementById('saveTripBtn');
+    const voiceBtn = document.getElementById('voiceBtn');
+    const voiceStatus = document.getElementById('voiceStatus');
+    const cancelVoiceSendBtn = document.getElementById('cancelVoiceSendBtn');
+
+    const tripPlayer = document.getElementById('tripPlayer');
+    const tpPrev = document.getElementById('tpPrev');
+    const tpPlay = document.getElementById('tpPlay');
+    const tpPause = document.getElementById('tpPause');
+    const tpNext = document.getElementById('tpNext');
+    const tpDay = document.getElementById('tpDay');
+    const tpSlider = document.getElementById('tpSlider');
+
+    const loadingOverlay = document.getElementById('loadingOverlay');
+
+    const drawer = document.getElementById('drawer');
+    const drawerTitle = document.getElementById('drawerTitle');
+    const drawerSub = document.getElementById('drawerSub');
+    const drawerImage = document.getElementById('drawerImage');
+    const drawerImageWrap = document.getElementById('drawerImageWrap');
+    const dType = document.getElementById('dType');
+    const dDay = document.getElementById('dDay');
+    const dCity = document.getElementById('dCity');
+    const dCost = document.getElementById('dCost');
+    const dNotes = document.getElementById('dNotes');
+    const dLivePrice = document.getElementById('dLivePrice');
+    const dCountryLanguage = document.getElementById('dCountryLanguage');
+    const dCurrency = document.getElementById('dCurrency');
+    const dMaps = document.getElementById('dMaps');
+    const dWiki = document.getElementById('dWiki');
+    const dBooking = document.getElementById('dBooking');
+
+    const savedTripsDrawer = document.getElementById('savedTripsDrawer');
+    const savedTripsClose = document.getElementById('savedTripsClose');
+    const savedTripsList = document.getElementById('savedTripsList');
+    const savedTripsTitle = document.getElementById('savedTripsTitle');
+    const savedTripsSub = document.getElementById('savedTripsSub');
+
+    const authModal = document.getElementById('authModal');
+    const authClose = document.getElementById('authClose');
+    const tabLogin = document.getElementById('tabLogin');
+    const tabRegister = document.getElementById('tabRegister');
+    const authEmail = document.getElementById('authEmail');
+    const authPassword = document.getElementById('authPassword');
+    const authMessage = document.getElementById('authMessage');
+    const authSubmit = document.getElementById('authSubmit');
+
+    const menuBtn = document.getElementById('menuBtn');
+    const menuDropdown = document.getElementById('menuDropdown');
+    const centerGlobeBtn = document.getElementById('centerGlobeBtn');
+
+    const userBtn = document.getElementById('userBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    const uProfile = document.getElementById('uProfile');
+    const uTrips = document.getElementById('uTrips');
+    const uLogin = document.getElementById('uLogin');
+
+    const hudTitle = document.getElementById('hudTitle');
+    const hudHint = document.getElementById('hudHint');
+
+    function applyTranslations() {
+      document.documentElement.lang = currentLang;
+      searchInput.placeholder = t("searchPlaceholder");
+      chatInput.placeholder = t("chatPlaceholder");
+      document.getElementById("chatTitleText").textContent = t("chatTitle");
+      document.getElementById("chatConnectedText").textContent = t("chatConnected");
+      chatToggle.textContent = chatOpen ? t("reduce") : t("open");
+      btnGo.textContent = t("go");
+      btnClear.textContent = t("reset");
+      chatSend.textContent = t("send");
+      if (voiceBtn) voiceBtn.title = t("voice");
+      document.getElementById("tripLabel").textContent = t("trip");
+      document.getElementById("dayLabel").textContent = t("day");
+      document.getElementById("legendTitle").textContent = t("legend");
+      document.getElementById("legendHotel").textContent = t("hotel");
+      document.getElementById("legendPlace").textContent = t("place");
+      document.getElementById("legendRestaurant").textContent = t("restaurant");
+      document.getElementById("legendActivity").textContent = t("activity");
+      document.getElementById("legendTransport").textContent = t("transport");
+      document.getElementById("legendActivePoint").textContent = t("activePoint");
+      document.getElementById("loadingTitle").textContent = t("loadingTitle");
+      document.getElementById("loadingText").textContent = t("loadingText");
+      document.getElementById("detailsTitle").textContent = t("details");
+      document.getElementById("labelType").textContent = t("type");
+      document.getElementById("labelDay").textContent = t("day");
+      document.getElementById("labelCity").textContent = t("city");
+      document.getElementById("labelEstimatedCost").textContent = t("estimatedCost");
+      document.getElementById("labelNotes").textContent = t("notes");
+      document.getElementById("labelLiveHotelPrice").textContent = t("liveHotelPrice");
+      document.getElementById("labelCountryLanguage").textContent = t("countryLanguage");
+      document.getElementById("labelCurrency").textContent = t("currency");
+      dMaps.textContent = t("openMaps");
+      dWiki.textContent = t("wikipedia");
+      dBooking.textContent = t("openHotelOffer");
+      document.getElementById("drawerClose").textContent = t("close");
+      savedTripsClose.textContent = t("close");
+      savedTripsTitle.textContent = t("savedTripsTitle");
+      savedTripsSub.textContent = t("savedTripsSub");
+      uTrips.textContent = t("myTrips");
+      if (centerGlobeBtn) {
+        centerGlobeBtn.textContent = '🌍 ' + t("centerGlobe");
+      }
+      if (!currentTrip) {
+        hudTitle.textContent = t("globeReady");
+        hudHint.textContent = t("hudHintDefault");
+      }
+    }
+
+    function updateTripPlayerPosition() {
+  if (window.innerWidth <= 768) {
+    tripPlayer.style.top = 'auto';
+    tripPlayer.style.bottom = '64px';
+    return;
+  }
+
+  if (window.innerWidth <= 1400) {
+    tripPlayer.style.top = 'calc(88px + 56vh + 12px)';
+    tripPlayer.style.bottom = 'auto';
+    return;
+  }
+
+  const rect = chatWrap.getBoundingClientRect();
+  tripPlayer.style.top = (rect.bottom + 12) + 'px';
+  tripPlayer.style.bottom = 'auto';
+}
+
+    function updateAuthUI() {
+      if (CURRENT_USER_ID && CURRENT_USER_EMAIL) {
+        uProfile.textContent = CURRENT_USER_EMAIL;
+        uLogin.textContent = "Logout";
+      } else {
+        uProfile.textContent = "Profilo";
+        uLogin.textContent = "Accedi";
+      }
+    }
+
+    let chatOpen = true;
+    chatToggle.addEventListener('click', () => {
+      chatOpen = !chatOpen;
+      chatBody.style.display = chatOpen ? 'block' : 'none';
+      document.body.classList.toggle('chat-collapsed', !chatOpen);
+      chatToggle.textContent = chatOpen ? t('reduce') : t('open');
+      setTimeout(updateTripPlayerPosition, 30);
+    });
+
+    langSelect.addEventListener('change', () => {
+      currentLang = langSelect.value;
+      localStorage.setItem('siteLang', currentLang);
+      applyTranslations();
+    });
+
+    function setLoading(isLoading) {
+      loadingOverlay.style.display = isLoading ? 'flex' : 'none';
+    }
+
+    function setComposerEnabled(enabled) {
+      chatInput.disabled = !enabled;
+      chatSend.disabled = !enabled;
+
+      if (voiceBtn) {
+        voiceBtn.disabled = !enabled;
+        voiceBtn.style.opacity = enabled ? '1' : '0.65';
+        voiceBtn.style.cursor = enabled ? 'pointer' : 'not-allowed';
+      }
+
+      chatSend.style.opacity = enabled ? '1' : '0.65';
+      chatSend.style.cursor = enabled ? 'pointer' : 'not-allowed';
+    }
+
+    function getUserLabel() {
+      return currentLang === 'it' ? 'Tu' : 'You';
+    }
+
+    function addMsg(role, text) {
+      const div = document.createElement('div');
+      div.className = 'msg ' + role;
+      const label = document.createElement('small');
+      label.textContent = role === 'user' ? getUserLabel() : 'IA';
+      div.appendChild(label);
+      div.appendChild(document.createTextNode(text));
+      chatMessages.appendChild(div);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function updateChatModeIndicator() {
+  if (!chatModeIndicator) return;
+
+  if (currentTrip) {
+    chatModeIndicator.textContent = 'Modalità: Modifica viaggio attuale';
+    chatModeIndicator.classList.add('editing');
+
+    if (newTripBtn) {
+      newTripBtn.style.display = 'inline-flex';
+    }
+  } else {
+    chatModeIndicator.textContent = 'Modalità: Nuovo viaggio';
+    chatModeIndicator.classList.remove('editing');
+
+    if (newTripBtn) {
+      newTripBtn.style.display = 'none';
+    }
+  }
+}
+
+    function isValidTripPayload(trip) {
+      return !!(
+        trip &&
+        typeof trip === 'object' &&
+        typeof trip.tripTitle === 'string' &&
+        trip.country &&
+        typeof trip.country.name === 'string' &&
+        Array.isArray(trip.dailyPlan) &&
+        trip.dailyPlan.length > 0
+      );
+    }
+
+    async function parseApiResponse(res) {
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) return await res.json();
+      const text = await res.text();
+      return { error: text || 'Invalid server response.' };
+    }
+
+    function openAuthModal(mode = "login") {
+      authMode = mode;
+      authModal.classList.add("open");
+      authMessage.textContent = "";
+      authEmail.value = CURRENT_USER_EMAIL || "";
+      authPassword.value = "";
+      tabLogin.classList.toggle("active", mode === "login");
+      tabRegister.classList.toggle("active", mode === "register");
+      authSubmit.textContent = mode === "login" ? "Accedi" : "Registrati";
+    }
+
+    function closeAuthModal() {
+      authModal.classList.remove("open");
+    }
+
+    async function registerUser(email, password) {
+      const res = await fetch(`${API_BASE_URL}/api/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await parseApiResponse(res);
+      if (!res.ok) throw new Error(data?.error || "Errore registrazione");
+
+      CURRENT_USER_ID = data.userId;
+      CURRENT_USER_EMAIL = data.email;
+      localStorage.setItem("userId", data.userId);
+      localStorage.setItem("userEmail", data.email);
+      updateAuthUI();
+      closeAuthModal();
+    }
+
+    async function loginUser(email, password) {
+      const res = await fetch(`${API_BASE_URL}/api/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await parseApiResponse(res);
+      if (!res.ok) throw new Error(data?.error || "Errore login");
+
+      CURRENT_USER_ID = data.userId;
+      CURRENT_USER_EMAIL = data.email;
+      localStorage.setItem("userId", data.userId);
+      localStorage.setItem("userEmail", data.email);
+      updateAuthUI();
+      closeAuthModal();
+    }
+
+    function logoutUser() {
+      CURRENT_USER_ID = null;
+      CURRENT_USER_EMAIL = null;
+      localStorage.removeItem("userId");
+      localStorage.removeItem("userEmail");
+      updateAuthUI();
+      addMsg("ai", "Logout effettuato.");
+    }
+
+    async function saveTripToBackend(trip) {
+      if (!CURRENT_USER_ID) {
+        console.warn("Utente non autenticato, salvataggio saltato.");
+        return null;
+      }
+
+      try {
+        console.log("SALVATAGGIO VIAGGIO CON BOOKING:", trip.bookingOptions);
+
+        const res = await fetch(`${API_BASE_URL}/api/saveTrip`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: CURRENT_USER_ID,
+            trip
+          })
+        });
+
+        const data = await parseApiResponse(res);
+        if (!res.ok) throw new Error(data?.error || 'Errore salvataggio viaggio');
+        return data;
+      } catch (error) {
+        console.error('Errore saveTripToBackend:', error);
+        return null;
+      }
+    }
+
+    async function saveCurrentTripManually() {
+  if (!CURRENT_USER_ID) {
+    openAuthModal("login");
+    return;
+  }
+
+  if (!currentTrip) {
+    addMsg("ai", "Non c'è ancora un viaggio da salvare.");
+    return;
+  }
+
+  const result = await saveTripToBackend(currentTrip);
+
+  if (result?.ok) {
+    addMsg("ai", "✅ Viaggio salvato nel tuo account.");
+  } else {
+    addMsg("ai", "❌ Non sono riuscito a salvare il viaggio.");
+  }
+}
+
+function showSavedBookingOptionsForTrip(trip) {
+  if (!trip || !trip.bookingOptions) return;
+
+  const options = trip.bookingOptions;
+
+  const hasHotels =
+    Array.isArray(options.hotels) && options.hotels.length > 0;
+
+  const hasActivities =
+    Array.isArray(options.activities) && options.activities.length > 0;
+
+  const hasFlights =
+    Array.isArray(options.flights) && options.flights.length > 0;
+
+  if (!hasHotels && !hasActivities && !hasFlights) return;
+
+  const bookingNeeds = {
+    hotels: hasHotels,
+    activities: hasActivities,
+    flights: hasFlights
+  };
+
+  showBookingSummaryForTrip(trip, bookingNeeds, "");
+
+  if (hasHotels) {
+    showHotelCardsInChat(options.hotels);
+  }
+
+  if (hasActivities) {
+    showActivityCardsInChat(options.activities);
+  }
+
+  if (hasFlights) {
+    showFlightCardsInChat(options.flights);
+  }
+}
+
+    async function loadTripsFromBackend() {
+      if (!CURRENT_USER_ID) return [];
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/trips?userId=${encodeURIComponent(CURRENT_USER_ID)}`);
+        const data = await parseApiResponse(res);
+        if (!res.ok) throw new Error(data?.error || 'Errore caricamento viaggi');
+        return data?.trips || [];
+      } catch (error) {
+        console.error('Errore loadTripsFromBackend:', error);
+        return [];
+      }
+    }
+
+    async function deleteTripFromBackend(tripId) {
+  if (!CURRENT_USER_ID) {
+    openAuthModal("login");
+    return false;
+  }
+
+  try {
+    console.log("DELETE tripId =", tripId);
+    console.log("DELETE userId =", CURRENT_USER_ID);
+
+    const res = await fetch(
+      `${API_BASE_URL}/api/trips/${encodeURIComponent(tripId)}?userId=${encodeURIComponent(CURRENT_USER_ID)}`,
+      { method: "DELETE" }
+    );
+
+    const data = await parseApiResponse(res);
+    console.log("DELETE response =", data);
+
+    if (!res.ok) {
+      throw new Error(data?.error || "Errore eliminazione viaggio");
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Errore deleteTripFromBackend:", error);
+    addMsg("ai", `❌ ${error.message || "Non sono riuscito a eliminare il viaggio."}`);
+    return false;
+  }
+}
+
+    function openSavedTripsDrawer() {
+      savedTripsDrawer.classList.add('open');
+    }
+
+    function closeSavedTripsDrawer() {
+      savedTripsDrawer.classList.remove('open');
+    }
+
+    function renderSavedTripsSidebar(trips) {
+      savedTripsList.innerHTML = '';
+
+      if (!Array.isArray(trips) || trips.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'savedTripEmpty';
+        empty.textContent = t('noSavedTrips');
+        savedTripsList.appendChild(empty);
+        return;
+      }
+
+      trips.forEach((savedTrip, index) => {
+        const trip = savedTrip.trip;
+
+        const card = document.createElement('div');
+        card.className = 'savedTripCard';
+
+        const coverImage = savedTrip.trip?.coverImage || savedTrip.coverImage || null;
+
+if (coverImage) {
+  const thumb = document.createElement('img');
+  thumb.className = 'savedTripThumb';
+  thumb.src = coverImage;
+  thumb.alt = savedTrip.tripTitle || 'Viaggio salvato';
+  card.appendChild(thumb);
+}
+
+        const topRow = document.createElement('div');
+        topRow.className = 'savedTripTopRow';
+
+        const title = document.createElement('div');
+        title.className = 'title';
+        title.textContent = `${index + 1}. ${savedTrip.tripTitle || 'Viaggio salvato'}`;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'deleteTripBtn';
+        deleteBtn.type = 'button';
+        deleteBtn.textContent = 'Elimina';
+
+        deleteBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+
+          const tripId =
+            typeof savedTrip._id === "string"
+              ? savedTrip._id
+              : savedTrip._id?.$oid || savedTrip.id;
+          const ok = await deleteTripFromBackend(tripId);
+
+          if (ok) {
+            addMsg('ai', '🗑️ Viaggio eliminato.');
+            await showMyTrips();
+          }
+        });
+
+        topRow.appendChild(title);
+        topRow.appendChild(deleteBtn);
+
+        const meta = document.createElement('div');
+        meta.className = 'savedTripMeta';
+
+        const badge1 = document.createElement('span');
+        badge1.className = 'badge';
+        badge1.textContent = `🌍 ${savedTrip.country?.name || '—'}`;
+
+        const badge2 = document.createElement('span');
+        badge2.className = 'badge';
+        badge2.textContent = `🗓️ ${savedTrip.summary?.days || trip?.summary?.days || '—'}`;
+
+        const badge3 = document.createElement('span');
+        badge3.className = 'badge';
+        badge3.textContent = `📅 ${new Date(savedTrip.createdAt).toLocaleDateString()}`;
+
+        meta.appendChild(badge1);
+        meta.appendChild(badge2);
+        meta.appendChild(badge3);
+
+        card.appendChild(topRow);
+        card.appendChild(meta);
+
+        card.addEventListener('click', async () => {
+  if (trip) {
+    console.log("VIAGGIO SALVATO RIAPERTO:", trip);
+    console.log("BOOKING OPTIONS RIAPERTE:", trip?.bookingOptions);
+
+    await renderTrip(trip);
+
+    if (trip.bookingOptions) {
+      showSavedBookingOptionsForTrip(trip);
+    } else {
+      console.warn("Nessuna bookingOptions trovata nel viaggio salvato:", trip);
+    }
+
+    closeSavedTripsDrawer();
+    addMsg('ai', `${t('reopenedTrip')}: ${savedTrip.tripTitle || 'Viaggio salvato'}`);
+  }
+});
+
+        savedTripsList.appendChild(card);
+      });
+    }
+
+    async function showMyTrips() {
+      const trips = await loadTripsFromBackend();
+      renderSavedTripsSidebar(trips);
+      openSavedTripsDrawer();
+    }
+
+    let hoveredCountry = null;
+    let selectedCountry = null;
+    let countriesFeatures = [];
+    const nameIndex = new Map();
+    const isoIndex = new Map();
+
+    const getP = f => f && f.properties ? f.properties : {};
+    const getName = f => getP(f).ADMIN || getP(f).NAME || getP(f).name || 'Country';
+    const getISO3 = f => String(getP(f).ISO_A3 || getP(f).ADM0_A3 || '').trim();
+
+    function prettyKind(k) {
+      const s = String(k || 'poi').toLowerCase();
+      const map = {
+        hotel: 'Hotel',
+        poi: 'Luogo',
+        restaurant: 'Ristorante',
+        activity: 'Attività',
+        transport: 'Spostamento'
+      };
+      return map[s] || s.charAt(0).toUpperCase() + s.slice(1);
+    }
+
+    function refreshPolygons() {
+      globe.polygonsTransitionDuration(0);
+      globe.polygonsData([...(countriesFeatures || [])]);
+    }
+
+    function flyToFeature(f, altitude, ms) {
+      try {
+        const c = d3.geoCentroid(f);
+        globe.pointOfView({ lat: c[1], lng: c[0], altitude }, ms);
+      } catch {}
+    }
+
+    let currentTrip = null;
+    let tripPoints = [];
+    let activePointId = null;
+    let activePointTimer = null;
+
+function setTemporaryActivePoint(pointId, duration = 2800) {
+  activePointId = pointId;
+
+  globe.pointsData([].concat(globe.pointsData()));
+
+  if (activePointTimer) clearTimeout(activePointTimer);
+
+  activePointTimer = setTimeout(() => {
+    activePointId = null;
+    globe.pointsData([].concat(globe.pointsData()));
+  }, duration);
+}
+    let currentSequence = [];
+    let currentSequenceIndex = 0;
+
+    let playback = {
+      isPlaying: false,
+      currentDay: 1,
+      maxDay: 1,
+      timer: null,
+      pointPauseMs: 6200,
+      dayPauseMs: 7200
+    };
+
+    const globeMount = document.getElementById('globe');
+    const globe = Globe()(globeMount)
+      .width(window.innerWidth)
+      .height(window.innerHeight)
+      .globeImageUrl('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg')
+      .backgroundColor('#000')
+      .showAtmosphere(true)
+      .atmosphereAltitude(0.18);
+
+    globe.pointOfView({ lat: 15, lng: 0, altitude: 1.8 }, 0);
+
+    function cinematicFlyToLatLng(lat, lng) {
+      const current = globe.pointOfView();
+      globe.pointOfView({ lat, lng, altitude: Math.max(1.55, current.altitude + 0.18) }, 700);
+      setTimeout(() => {
+        globe.pointOfView({ lat, lng, altitude: 1.08 }, 1800);
+      }, 240);
+    }
+
+    let autoRotate = true;
+    let lastUserAction = Date.now();
+
+    function pauseAutoRotate(ms = 15000) {
+      autoRotate = false;
+      lastUserAction = Date.now();
+      setTimeout(() => {
+        if (Date.now() - lastUserAction >= ms) autoRotate = true;
+      }, ms);
+    }
+
+    const canvas = globe.renderer().domElement;
+    canvas.addEventListener('pointerdown', () => pauseAutoRotate(18000), { passive: true });
+    canvas.addEventListener('wheel', () => pauseAutoRotate(18000), { passive: true });
+    canvas.addEventListener('touchstart', () => pauseAutoRotate(18000), { passive: true });
+
+    (function rotateLoop() {
+      if (autoRotate) {
+        const pov = globe.pointOfView();
+        globe.pointOfView({ lat: pov.lat, lng: pov.lng + 0.018, altitude: pov.altitude }, 0);
+      }
+      requestAnimationFrame(rotateLoop);
+    })();
+
+    globe
+      .pointsData([])
+      .pointLat(d => d.lat)
+      .pointLng(d => d.lng)
+      .pointAltitude(d => d.id === activePointId ? 0.13 : (d.kind === 'hotel' ? 0.04 : 0.022))
+      .pointRadius(d => {
+  if (d.id === activePointId) return 0.52;
+
+  if (d.isBookingOption) {
+    if (d.bookingType === 'hotel') return 0.28;
+    if (d.bookingType === 'activity') return 0.24;
+    return 0.22;
+  }
+
+  const k = String(d.kind || 'poi').toLowerCase();
+
+  if (k === 'hotel') return 0.24;
+  if (k === 'restaurant') return 0.20;
+  if (k === 'transport') return 0.16;
+  if (k === 'activity') return 0.19;
+
+  return 0.20;
+})
+
+      .pointColor(d => {
+  const k = String(d.kind || 'poi').toLowerCase();
+
+  if (d.id === activePointId) {
+    return 'rgba(255,215,0,1)';
+  }
+
+  if (d.isBookingOption) {
+    if (d.bookingType === 'hotel') return 'rgba(255,255,255,1)';
+    if (d.bookingType === 'activity') return 'rgba(210,150,255,1)';
+    return 'rgba(120,210,255,1)';
+  }
+
+  if (k === 'hotel') return 'rgba(255,255,255,0.96)';
+  if (k === 'restaurant') return 'rgba(255,145,60,0.96)';
+  if (k === 'transport') return 'rgba(0,220,140,0.96)';
+  if (k === 'activity') return 'rgba(180,130,255,0.96)';
+
+  return 'rgba(70,150,255,0.96)';
+})
+      .onPointHover(p => {
+        if (!p) return;
+        hudTitle.textContent = p.name;
+        hudHint.textContent = t('clickForDetails') + ' • ' + p.kindLabel + (p.city ? ' • ' + p.city : '');
+      })
+      .onPointClick(p => {
+        if (!p) return;
+        pauseAutoRotate(18000);
+        setTemporaryActivePoint(p.id);
+        cinematicFlyToLatLng(p.lat, p.lng);
+        openPlaceDetails(p);
+      });
+
+    globe
+      .arcsData([])
+      .arcStartLat(d => d.startLat)
+      .arcStartLng(d => d.startLng)
+      .arcEndLat(d => d.endLat)
+      .arcEndLng(d => d.endLng)
+      .arcAltitude(d => d.altitude || 0.2)
+      .arcStroke(d => d.stroke || 1.0)
+      .arcDashLength(0.42)
+      .arcDashGap(0.18)
+      .arcDashAnimateTime(1500)
+      .arcColor(d => d.color || ['rgba(255,215,0,0.28)','rgba(255,120,0,0.40)']);
+
+    function clearTripCards() {
+      Array.from(chatMessages.querySelectorAll('.tripCard, .tripSummary')).forEach(el => el.remove());
+    }
+
+    function makePill(k, v) {
+      const span = document.createElement('span');
+      span.className = 'pill';
+      span.textContent = k + ': ' + v;
+      return span;
+    }
+
+    function normalizePlace(item, trip) {
+      const currency = trip?.summary?.budget?.currency || trip?.totalEstimatedCost?.currency || '—';
+      return {
+        name: item.title || item.name || t('place'),
+        kind: item.kind || item.type || 'poi',
+        kindLabel: prettyKind(item.kind || item.type),
+        day: item.day != null ? item.day : (item.dayIndex != null ? item.dayIndex : null),
+        city: item.city || null,
+        lat: item.lat != null ? item.lat : null,
+        lng: item.lng != null ? item.lng : null,
+        cost: item.estimatedCost != null ? item.estimatedCost : (item.cost != null ? item.cost : null),
+        currency,
+        countryLanguage: trip?.country?.language || null,
+        description: item.description || '',
+        notes: item.notes || '',
+        livePrice: item.livePrice ?? null,
+        liveCurrency: item.liveCurrency ?? null,
+        bookingUrl: item.bookingUrl || null
+      };
+    }
+
+    function renderTripSummary(trip) {
+      const old = document.getElementById('tripSummaryCard');
+      if (old) old.remove();
+
+      const wrap = document.createElement('div');
+      wrap.className = 'tripSummary';
+      wrap.id = 'tripSummaryCard';
+
+      const title = trip?.tripTitle || 'Itinerary';
+      const country = trip?.country?.name || '—';
+      const days = trip?.summary?.days ?? (Array.isArray(trip?.dailyPlan) ? trip.dailyPlan.length : '—');
+      const people = trip?.summary?.people ?? '—';
+      const budget = trip?.summary?.budget?.amount != null
+        ? String(trip.summary.budget.amount) + ' ' + (trip.summary.budget.currency || '')
+        : '—';
+      const style = trip?.summary?.style || 'custom';
+      const countryLanguage = trip?.country?.language || '—';
+      const currency = trip?.summary?.budget?.currency || trip?.totalEstimatedCost?.currency || '—';
+
+      const h3 = document.createElement('h3');
+      h3.textContent = title;
+      wrap.appendChild(h3);
+
+      const meta = document.createElement('div');
+      meta.className = 'metaLine';
+
+      function makeBadge(text) {
+        const span = document.createElement('span');
+        span.className = 'badge';
+        span.textContent = text;
+        return span;
+      }
+
+      meta.appendChild(makeBadge('🌍 ' + country));
+      meta.appendChild(makeBadge('🗓️ ' + days));
+      meta.appendChild(makeBadge('👥 ' + people));
+      meta.appendChild(makeBadge('💰 ' + budget.trim()));
+      meta.appendChild(makeBadge('✨ ' + style));
+      meta.appendChild(makeBadge('🗣️ ' + countryLanguage));
+      meta.appendChild(makeBadge('💱 ' + currency));
+
+      wrap.appendChild(meta);
+      chatMessages.appendChild(wrap);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function appendTripCard(dayObj) {
+      const card = document.createElement('div');
+      card.className = 'tripCard';
+      card.setAttribute('data-day', String(dayObj.day));
+
+      const header = document.createElement('div');
+      header.className = 'title';
+      header.textContent = t('day') + ' ' + dayObj.day + (dayObj.city ? ' • ' + dayObj.city : '');
+      card.appendChild(header);
+
+      if (dayObj.imageUrl) {
+  const img = document.createElement('img');
+  img.src = dayObj.imageUrl;
+  img.loading = 'lazy';
+  img.decoding = 'async';
+  img.referrerPolicy = 'no-referrer';
+  img.alt = dayObj.city || `Day ${dayObj.day}`;
+  img.style.width = '100%';
+  img.style.height = '150px';
+  img.style.objectFit = 'cover';
+  img.style.borderRadius = '12px';
+  img.style.margin = '10px 0';
+  card.appendChild(img);
+}
+
+      if (dayObj.city) card.appendChild(makePill(t('city'), dayObj.city));
+
+      (dayObj.items || []).forEach((item, idx) => {
+        const it = document.createElement('div');
+        it.className = 'tripItem tripItemCard';
+
+const itemImage = item.imageUrl || dayObj.imageUrl || currentTrip?.coverImage || null;
+
+if (itemImage) {
+  const img = document.createElement('img');
+  img.className = 'tripItemImage';
+  img.src = itemImage;
+  img.loading = 'lazy';
+  img.decoding = 'async';
+  img.referrerPolicy = 'no-referrer';
+  img.alt = item.title || item.name || 'Tappa viaggio';
+  it.appendChild(img);
+}
+        it.setAttribute('data-day', String(dayObj.day));
+        it.setAttribute('data-item-index', String(idx));
+
+        it.addEventListener('click', () => {
+          const normalized = {
+  ...normalizePlace(item, currentTrip),
+  imageUrl: item.imageUrl || dayObj.imageUrl || currentTrip?.coverImage || null
+};
+          if (normalized.lat != null && normalized.lng != null) {
+            pauseAutoRotate(18000);
+            const pointId = findMatchingPointId(normalized);
+            if (pointId) setTemporaryActivePoint(pointId);
+            cinematicFlyToLatLng(normalized.lat, normalized.lng);
+          }
+          highlightTripItem(dayObj.day, idx);
+          openPlaceDetails(normalized);
+        });
+
+        const row = document.createElement('div');
+        row.className = 'row';
+
+        const left = document.createElement('div');
+        left.textContent = (item.time ? item.time + ' — ' : '') + (item.title || item.name || t('activity'));
+
+        const right = document.createElement('div');
+        right.style.opacity = '0.85';
+
+        if (item.livePrice != null) {
+          right.textContent = String(item.livePrice) + (item.liveCurrency ? ' ' + item.liveCurrency : '');
+        } else if (item.estimatedCost != null) {
+          right.textContent = String(item.estimatedCost) + ' ' + (currentTrip?.summary?.budget?.currency || '');
+        } else {
+          right.textContent = '';
+        }
+
+        row.appendChild(left);
+        row.appendChild(right);
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        const parts = [];
+        if (item.type) parts.push(t('type') + ': ' + prettyKind(item.type));
+        if (item.notes) parts.push(t('notes') + ': ' + item.notes);
+        meta.textContent = parts.join(' • ');
+
+        it.appendChild(row);
+        if (meta.textContent) it.appendChild(meta);
+        card.appendChild(it);
+      });
+
+      chatMessages.appendChild(card);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function openPlaceDetails(place) {
+  let placeImage = place.imageUrl || null;
+
+  if (!placeImage && place.day && Array.isArray(currentTrip?.dailyPlan)) {
+    const matchingDay = currentTrip.dailyPlan.find(
+      d => Number(d.day) === Number(place.day)
+    );
+    placeImage = matchingDay?.imageUrl || null;
+  }
+
+  if (!placeImage) {
+    placeImage = currentTrip?.coverImage || null;
+  }
+
+  if (placeImage) {
+    drawerImage.src = placeImage;
+    drawerImage.alt = place.name || t('place');
+    drawerImageWrap.style.display = 'block';
+  } else {
+    drawerImage.src = '';
+    drawerImageWrap.style.display = 'none';
+  }
+
+  drawerTitle.textContent = place.name || t('place');
+  drawerSub.textContent = place.description ? place.description : t('clickMarkerDetails');
+
+  dType.textContent = place.kindLabel || '—';
+  dDay.textContent = place.day != null ? String(place.day) : '—';
+  dCity.textContent = place.city || '—';
+
+  if (place.cost != null && place.currency) {
+    dCost.textContent = String(place.cost) + ' ' + place.currency;
+  } else if (place.cost != null) {
+    dCost.textContent = String(place.cost);
+  } else {
+    dCost.textContent = '—';
+  }
+
+  let notesText = place.notes || '';
+
+  if (place.isBookingOption) {
+    const extra = [];
+
+    if (place.provider && place.provider !== 'mock') {
+      extra.push('Provider: ' + place.provider);
+    }
+
+    if (place.rating != null) {
+      extra.push('Rating: ' + place.rating);
+    }
+
+    if (place.duration) {
+      extra.push('Durata: ' + place.duration);
+    }
+
+    if (place.category) {
+      const categoryLabels = {
+        museum: 'Museo',
+        park: 'Parco',
+        experience: 'Esperienza',
+        activity: 'Attività',
+        tour: 'Tour'
+      };
+
+      extra.push('Tipo: ' + (categoryLabels[place.category] || place.category));
+    }
+
+    if (extra.length > 0) {
+      notesText = notesText
+        ? notesText + ' • ' + extra.join(' • ')
+        : extra.join(' • ');
+    }
+  }
+
+  dNotes.textContent = notesText || '—';
+
+  if (place.livePrice != null) {
+    dLivePrice.textContent = String(place.livePrice) + (place.liveCurrency ? ' ' + place.liveCurrency : '');
+  } else {
+    dLivePrice.textContent = '—';
+  }
+
+  dCountryLanguage.textContent = place.countryLanguage || currentTrip?.country?.language || '—';
+  dCurrency.textContent = place.currency || currentTrip?.summary?.budget?.currency || currentTrip?.totalEstimatedCost?.currency || '—';
+
+  if (place.bookingUrl) {
+    dBooking.href = place.bookingUrl;
+    dBooking.style.display = 'inline-flex';
+
+    if (place.bookingType === 'hotel') {
+      dBooking.textContent = 'Prenota hotel';
+    } else if (place.bookingType === 'activity') {
+      dBooking.textContent = 'Prenota attività';
+    } else {
+      dBooking.textContent = t('openHotelOffer');
+    }
+  } else {
+    dBooking.href = '#';
+    dBooking.style.display = 'none';
+  }
+
+  const q = encodeURIComponent((place.name || '') + (place.city ? ' ' + place.city : ''));
+  dMaps.href = 'https://www.google.com/maps/search/?api=1&query=' + q;
+
+  const wikiName = encodeURIComponent(String(place.name || '').replaceAll(' ', '_'));
+  dWiki.href = `https://${currentLang}.wikipedia.org/wiki/` + wikiName;
+
+  drawer.classList.add('open');
+}
+
+    document.getElementById('drawerClose').addEventListener('click', () => drawer.classList.remove('open'));
+    savedTripsClose.addEventListener('click', closeSavedTripsDrawer);
+    authClose.addEventListener("click", closeAuthModal);
+
+    tabLogin.addEventListener("click", () => openAuthModal("login"));
+    tabRegister.addEventListener("click", () => openAuthModal("register"));
+
+    authSubmit.addEventListener("click", async () => {
+      const email = authEmail.value.trim();
+      const password = authPassword.value.trim();
+      authMessage.textContent = "";
+
+      if (!email || !password) {
+        authMessage.textContent = "Inserisci email e password.";
+        return;
+      }
+
+      try {
+        if (authMode === "login") {
+          await loginUser(email, password);
+          addMsg("ai", `Login effettuato come ${email}`);
+        } else {
+          await registerUser(email, password);
+          addMsg("ai", `Registrazione completata come ${email}`);
+        }
+      } catch (error) {
+        authMessage.textContent = error.message || "Errore autenticazione.";
+      }
+    });
+
+    menuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menuDropdown.classList.toggle('open');
+      userDropdown.classList.remove('open');
+    });
+
+    userBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      userDropdown.classList.toggle('open');
+      menuDropdown.classList.remove('open');
+    });
+
+    window.addEventListener('click', (e) => {
+      const withinMenu = menuDropdown.contains(e.target) || menuBtn.contains(e.target);
+      const withinUser = userDropdown.contains(e.target) || userBtn.contains(e.target);
+      if (!withinMenu) menuDropdown.classList.remove('open');
+      if (!withinUser) userDropdown.classList.remove('open');
+    });
+
+    uProfile.addEventListener('click', () => {
+      userDropdown.classList.remove('open');
+      if (CURRENT_USER_ID && CURRENT_USER_EMAIL) {
+        addMsg('ai', `Sei loggato come ${CURRENT_USER_EMAIL}`);
+      } else {
+        openAuthModal("login");
+      }
+    });
+
+    uTrips.addEventListener('click', async () => {
+      userDropdown.classList.remove('open');
+      if (!CURRENT_USER_ID) {
+        openAuthModal("login");
+        return;
+      }
+      await showMyTrips();
+    });
+
+    uLogin.addEventListener('click', () => {
+      userDropdown.classList.remove('open');
+      if (CURRENT_USER_ID) {
+        logoutUser();
+      } else {
+        openAuthModal("login");
+      }
+    });
+
+    function buildTripPoints(trip) {
+      const pts = [];
+      const currency = trip?.summary?.budget?.currency || trip?.totalEstimatedCost?.currency || '—';
+      const countryLanguage = trip?.country?.language || '—';
+
+      (trip.hotels || []).forEach(h => {
+        if (h.lat == null || h.lng == null) return;
+        pts.push({
+          id: 'hotel:' + h.name + ':' + h.lat + ':' + h.lng,
+          name: h.name || t('hotel'),
+          kind: 'hotel',
+          kindLabel: prettyKind('hotel'),
+          day: h.day != null ? h.day : null,
+          city: h.city || null,
+          lat: Number(h.lat),
+          lng: Number(h.lng),
+          cost: h.pricePerNight != null ? h.pricePerNight : null,
+          currency,
+          countryLanguage,
+          notes: h.notes || '',
+          livePrice: h.livePrice ?? null,
+          liveCurrency: h.liveCurrency ?? null,
+          bookingUrl: h.bookingUrl || null
+        });
+      });
+
+      (trip.places || []).forEach(p => {
+        if (p.lat == null || p.lng == null) return;
+        pts.push({
+          id: 'poi:' + p.name + ':' + p.lat + ':' + p.lng,
+          name: p.name || t('place'),
+          kind: p.type || 'poi',
+          kindLabel: prettyKind(p.type || 'poi'),
+          day: p.day != null ? p.day : null,
+          city: p.city || null,
+          lat: Number(p.lat),
+          lng: Number(p.lng),
+          cost: p.estimatedCost != null ? p.estimatedCost : null,
+          currency,
+          countryLanguage,
+          notes: p.notes || ''
+        });
+      });
+
+      (trip.dailyPlan || []).forEach(d => {
+        (d.items || []).forEach((it, idx) => {
+          if (it.lat == null || it.lng == null) return;
+          pts.push({
+            imageUrl: it.imageUrl || d.imageUrl || trip.coverImage || null,
+            id: 'day:' + d.day + ':' + idx + ':' + (it.title || it.name || 'activity') + ':' + it.lat + ':' + it.lng,
+            name: it.title || it.name || t('activity'),
+            kind: it.type || 'poi',
+            kindLabel: prettyKind(it.type || 'poi'),
+            day: d.day,
+            itemIndex: idx,
+            city: d.city || it.city || null,
+            lat: Number(it.lat),
+            lng: Number(it.lng),
+            cost: it.estimatedCost != null ? it.estimatedCost : null,
+            currency,
+            countryLanguage,
+            notes: it.notes || '',
+            livePrice: it.livePrice ?? null,
+            liveCurrency: it.liveCurrency ?? null,
+            bookingUrl: it.bookingUrl || null
+          });
+        });
+      });
+
+      // Marker bookingOptions - hotel prenotabili
+(trip.bookingOptions?.hotels || []).forEach((h, idx) => {
+  if (h.lat == null || h.lng == null) return;
+
+  pts.push({
+    id: 'booking-hotel:' + (h.id || idx) + ':' + h.lat + ':' + h.lng,
+    name: h.title || h.name || 'Hotel prenotabile',
+    kind: 'hotel',
+    kindLabel: 'Hotel prenotabile',
+    day: null,
+    city: h.city || null,
+    lat: Number(h.lat),
+    lng: Number(h.lng),
+    cost: h?.price?.amount ?? null,
+    currency: h?.price?.currency || trip?.summary?.budget?.currency || 'EUR',
+    countryLanguage: trip?.country?.language || null,
+    notes: h.notes || '',
+    livePrice: h?.price?.amount ?? null,
+    liveCurrency: h?.price?.currency || 'EUR',
+    bookingUrl: h.bookingUrl || null,
+    provider: h.provider || '',
+    rating: h.rating ?? null,
+    isBookingOption: true,
+    bookingType: 'hotel',
+    rawBooking: h
+  });
+});
+
+// Marker bookingOptions - attività / musei / parchi prenotabili
+(trip.bookingOptions?.activities || []).forEach((a, idx) => {
+  if (a.lat == null || a.lng == null) return;
+
+  pts.push({
+    id: 'booking-activity:' + (a.id || idx) + ':' + a.lat + ':' + a.lng,
+    name: a.title || a.name || 'Attività prenotabile',
+    kind: 'activity',
+    kindLabel: prettyKind(a.category || 'activity'),
+    day: null,
+    city: a.city || null,
+    lat: Number(a.lat),
+    lng: Number(a.lng),
+    cost: a?.price?.amount ?? null,
+    currency: a?.price?.currency || trip?.summary?.budget?.currency || 'EUR',
+    countryLanguage: trip?.country?.language || null,
+    notes: a.notes || '',
+    livePrice: a?.price?.amount ?? null,
+    liveCurrency: a?.price?.currency || 'EUR',
+    bookingUrl: a.bookingUrl || null,
+    provider: a.provider || '',
+    duration: a.duration || '',
+    category: a.category || '',
+    isBookingOption: true,
+    bookingType: 'activity',
+    rawBooking: a
+  });
+});
+
+      const seen = new Set();
+      return pts.filter(p => {
+        if (seen.has(p.id)) return false;
+        seen.add(p.id);
+        return true;
+      });
+    }
+
+    function buildDaySequence(day) {
+      const pts = [].concat(tripPoints || []).filter(p =>
+  Number(p.day) === Number(day) && p.isBookingOption !== true
+);
+      pts.sort((a, b) => {
+        const ia = a.itemIndex != null ? a.itemIndex : 999;
+        const ib = b.itemIndex != null ? b.itemIndex : 999;
+        if (ia !== ib) return ia - ib;
+        const pa = a.kind === 'hotel' ? 0 : 1;
+        const pb = b.kind === 'hotel' ? 0 : 1;
+        if (pa !== pb) return pa - pb;
+        return String(a.name).localeCompare(String(b.name));
+      });
+      return pts;
+    }
+
+    function findMatchingPointId(place) {
+      const match = (tripPoints || []).find(p =>
+        p.name === place.name &&
+        p.day === place.day &&
+        p.city === place.city
+      );
+      return match ? match.id : null;
+    }
+
+    function getTripMaxDay(trip) {
+      const a = trip?.summary?.days ?? null;
+      if (Number.isFinite(a) && a > 0) return Math.floor(a);
+      const b = Array.isArray(trip?.dailyPlan) ? trip.dailyPlan.length : null;
+      if (Number.isFinite(b) && b > 0) return Math.floor(b);
+      let m = 1;
+      (tripPoints || []).forEach(p => { if (p.day != null) m = Math.max(m, Number(p.day)); });
+      return m;
+    }
+
+    function setActiveDayCard(day) {
+      document.querySelectorAll('.tripCard[data-day]').forEach(el => {
+        const d = Number(el.getAttribute('data-day'));
+        el.classList.toggle('active', d === day);
+      });
+    }
+
+    function clearActiveTripItems() {
+      document.querySelectorAll('.tripItem.active').forEach(el => el.classList.remove('active'));
+    }
+
+    function highlightTripItem(day, idx) {
+      clearActiveTripItems();
+      const el = document.querySelector('.tripItem[data-day="' + day + '"][data-item-index="' + idx + '"]');
+      if (el) el.classList.add('active');
+    }
+
+    function arcAltitudeForPoints(a, b) {
+      const dLat = Math.abs(a.lat - b.lat);
+      const dLng = Math.abs(a.lng - b.lng);
+      const dist = Math.sqrt(dLat * dLat + dLng * dLng);
+      return Math.max(0.12, Math.min(0.34, 0.12 + dist * 0.01));
+    }
+
+    function buildProgressArcs(currentSeq, currentIdx) {
+      const arcs = [];
+      for (let i=0; i<currentIdx; i++){
+        const a = currentSeq[i];
+        const b = currentSeq[i+1];
+        if (!a || !b) continue;
+        arcs.push({
+          startLat: a.lat,
+          startLng: a.lng,
+          endLat: b.lat,
+          endLng: b.lng,
+          altitude: arcAltitudeForPoints(a, b),
+          stroke: i === currentIdx - 1 ? 1.18 : 0.95,
+          color: i === currentIdx - 1
+            ? ['rgba(255,215,0,0.48)','rgba(255,120,0,0.60)']
+            : ['rgba(255,255,255,0.14)','rgba(80,140,220,0.24)']
+        });
+      }
+      return arcs;
+    }
+
+    function showDay(day) {
+      if (!currentTrip) return;
+
+      const d = Math.max(1, Math.min(playback.maxDay, Number(day)));
+      playback.currentDay = d;
+
+      tpDay.textContent = String(d);
+      tpSlider.value = String(d);
+
+      const dayPoints = (tripPoints || []).filter(p =>
+  Number(p.day) === d || p.isBookingOption === true
+);
+      currentSequence = buildDaySequence(d);
+      currentSequenceIndex = 0;
+
+      const first = currentSequence[0] || dayPoints[0] || null;
+      activePointId = first ? first.id : null;
+
+      globe.pointsData(dayPoints);
+      globe.arcsData([]);
+
+      if (first) {
+        pauseAutoRotate(18000);
+        cinematicFlyToLatLng(first.lat, first.lng);
+      }
+
+      setActiveDayCard(d);
+
+      if (first && first.itemIndex != null) {
+        highlightTripItem(d, first.itemIndex);
+      }
+
+      globe.pointsData([].concat(globe.pointsData()));
+
+      hudTitle.textContent = t('day') + ' ' + d;
+      hudHint.textContent = t('points') + ': ' + dayPoints.length + ' • ' + t('playToStart');
+    }
+
+    function stepWithinDay() {
+      if (!currentSequence.length) return false;
+      if (currentSequenceIndex >= currentSequence.length) return false;
+
+      const point = currentSequence[currentSequenceIndex];
+      if (!point) return false;
+
+      setTemporaryActivePoint(point.id);
+
+      if (point.lat != null && point.lng != null) {
+        pauseAutoRotate(18000);
+        cinematicFlyToLatLng(point.lat, point.lng);
+      }
+
+      if (point.itemIndex != null) highlightTripItem(point.day, point.itemIndex);
+
+      const arcs = buildProgressArcs(currentSequence, currentSequenceIndex);
+      globe.arcsData(arcs);
+
+      hudTitle.textContent = point.name || (t('day') + ' ' + point.day);
+      hudHint.textContent = (point.kindLabel || t('place')) + (point.city ? ' • ' + point.city : '');
+
+      openPlaceDetails(point);
+
+      currentSequenceIndex += 1;
+      return true;
+    }
+
+    function scheduleNextPlaybackTick(delay) {
+      if (!playback.isPlaying) return;
+      if (playback.timer) clearTimeout(playback.timer);
+      playback.timer = setTimeout(playbackTick, delay);
+    }
+
+    function playbackTick() {
+      if (!playback.isPlaying) return;
+
+      if (currentSequenceIndex < currentSequence.length) {
+        stepWithinDay();
+        const morePointsRemain = currentSequenceIndex < currentSequence.length;
+        scheduleNextPlaybackTick(morePointsRemain ? playback.pointPauseMs : playback.dayPauseMs);
+        return;
+      }
+
+      const nextDay = playback.currentDay + 1;
+      if (nextDay > playback.maxDay) {
+        pauseTrip();
+        return;
+      }
+
+      showDay(nextDay);
+      scheduleNextPlaybackTick(700);
+    }
+
+    function playTrip() {
+      if (!currentTrip) return;
+      if (playback.isPlaying) return;
+      playback.isPlaying = true;
+
+      if (playback.currentDay > playback.maxDay) playback.currentDay = 1;
+      showDay(playback.currentDay);
+      scheduleNextPlaybackTick(700);
+    }
+
+    function pauseTrip() {
+      playback.isPlaying = false;
+      if (playback.timer) {
+        clearTimeout(playback.timer);
+        playback.timer = null;
+      }
+    }
+
+    async function renderTrip(trip) {
+      if (!trip || !Array.isArray(trip.dailyPlan) || trip.dailyPlan.length === 0) {
+        addMsg('ai', t('tripInvalid'));
+        return;
+      }
+
+      currentTrip = trip;
+      window.currentTrip = currentTrip;
+      updateChatModeIndicator();
+      activePointId = null;
+      currentSequence = [];
+      currentSequenceIndex = 0;
+      
+
+      clearTripCards();
+      renderTripSummary(trip);
+
+      const title = trip.tripTitle || 'Itinerary';
+      const cName = trip?.country?.name || '—';
+      const days = trip?.summary?.days ?? (Array.isArray(trip.dailyPlan) ? trip.dailyPlan.length : '—');
+      const budget = trip?.summary?.budget?.amount != null
+        ? String(trip.summary.budget.amount) + ' ' + (trip.summary.budget.currency || '')
+        : '—';
+      const countryLanguage = trip?.country?.language || '—';
+      const currency = trip?.summary?.budget?.currency || trip?.totalEstimatedCost?.currency || '—';
+
+      addMsg(
+        'ai',
+        '✅ ' + title +
+        '\n' + t('destination') + ': ' + cName +
+        '\n' + t('duration') + ': ' + days +
+        '\n' + t('language') + ': ' + countryLanguage +
+        '\n' + t('currency') + ': ' + currency +
+        '\n' + t('estimatedBudget') + ': ' + budget
+      );
+
+      (trip.dailyPlan || []).forEach(dayObj => appendTripCard(dayObj));
+
+      const iso3 = trip?.country?.iso3 || null;
+      if (iso3 && isoIndex.has(String(iso3).toUpperCase())) {
+        selectedCountry = isoIndex.get(String(iso3).toUpperCase());
+        flyToFeature(selectedCountry, 1.95, 2300);
+      } else if (trip?.country?.name) {
+        const f = nameIndex.get(String(trip.country.name).toLowerCase());
+        if (f) {
+          selectedCountry = f;
+          flyToFeature(selectedCountry, 1.95, 2300);
+        }
+      }
+
+      tripPoints = buildTripPoints(trip);
+      globe.pointsData([]);
+      globe.arcsData([]);
+
+      hudTitle.textContent = trip?.country?.name ? (t('trip') + ': ' + trip.country.name) : 'Itinerary';
+      hudHint.textContent = t('markers') + ': ' + tripPoints.length + ' • ' + t('clickMarkerDetails');
+
+      const first = tripPoints.find(p => p.lat != null && p.lng != null);
+      if (first) cinematicFlyToLatLng(first.lat, first.lng);
+
+      playback.maxDay = getTripMaxDay(trip);
+      playback.currentDay = 1;
+      tpSlider.min = '1';
+      tpSlider.max = String(playback.maxDay);
+      tpSlider.value = '1';
+      tpDay.textContent = '1';
+      tripPlayer.style.display = 'flex';
+      updateTripPlayerPosition();
+
+      setTimeout(() => showDay(1), 350);
+    }
+
+    function resetTrip() {
+      currentTrip = null;
+      updateChatModeIndicator();
+      tripPoints = [];
+      activePointId = null;
+      currentSequence = [];
+      currentSequenceIndex = 0;
+      globe.pointsData([]);
+      globe.arcsData([]);
+      clearTripCards();
+      addMsg('ai', t('tripReset'));
+      hudTitle.textContent = t('globeReady');
+      hudHint.textContent = t('hudHintDefault');
+      drawer.classList.remove('open');
+      pauseTrip();
+      tripPlayer.style.display = 'none';
+    }
+
+    fetch('https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@master/geojson/ne_110m_admin_0_countries.geojson')
+      .then(r => r.json())
+      .then(data => {
+        countriesFeatures = data.features || [];
+
+        const frag = document.createDocumentFragment();
+        countriesFeatures.forEach(f => {
+          const name = getName(f);
+          const iso = getISO3(f);
+
+          nameIndex.set(name.toLowerCase(), f);
+          if (iso && iso !== '-99') isoIndex.set(iso.toUpperCase(), f);
+
+          const opt = document.createElement('option');
+          opt.value = name;
+          frag.appendChild(opt);
+        });
+        countriesList.appendChild(frag);
+
+        globe
+          .polygonsData(countriesFeatures)
+          .polygonAltitude(d =>
+            d === selectedCountry ? 0.015 :
+            d === hoveredCountry ? 0.010 :
+            0.0001
+          )
+          .polygonCapColor(() => 'rgba(0,0,0,0)')
+          .polygonSideColor(() => 'rgba(0,0,0,0)')
+          .polygonStrokeColor(d =>
+            d === selectedCountry ? 'rgba(255,215,0,1)' :
+            d === hoveredCountry ? 'rgba(255,255,255,0.85)' :
+            'rgba(255,255,255,0.15)'
+          )
+          .onPolygonHover(d => {
+            hoveredCountry = d || null;
+            if (hoveredCountry && !currentTrip) {
+              pauseAutoRotate(9000);
+              hudTitle.textContent = getName(hoveredCountry);
+              hudHint.textContent = t('clickForZoom');
+            } else if (!currentTrip) {
+              hudTitle.textContent = t('globeReady');
+              hudHint.textContent = t('hudHintDefault');
+            }
+            refreshPolygons();
+          })
+          .onPolygonClick(d => {
+            selectedCountry = d || null;
+            if (selectedCountry) {
+              pauseAutoRotate(16000);
+              flyToFeature(selectedCountry, 1.95, 1800);
+              hudTitle.textContent = getName(selectedCountry);
+              hudHint.textContent = t('zoomOnCountry');
+            }
+          });
+
+        globe.pointOfView({ lat: 15, lng: 0, altitude: 1.8 }, 1200);
+        applyTranslations();
+        updateAuthUI();
+        addMsg('ai', t('welcome'));
+        updateTripPlayerPosition();
+      })
+      .catch(err => {
+        console.error('Errore caricamento GeoJSON:', err);
+        applyTranslations();
+        updateAuthUI();
+        addMsg('ai', '❌ Errore nel caricamento dei paesi sul globo.');
+      });
+
+    function runSearch() {
+      const q = (searchInput.value || '').trim();
+      if (!q) return;
+
+      const exact = nameIndex.get(q.toLowerCase());
+      if (exact) { selectedCountry = exact; flyToFeature(exact, 1.95, 1800); return; }
+
+      const iso = isoIndex.get(q.toUpperCase());
+      if (iso) { selectedCountry = iso; flyToFeature(iso, 1.95, 1800); return; }
+
+      const ql = q.toLowerCase();
+      const found = countriesFeatures.find(f => getName(f).toLowerCase().includes(ql));
+      if (found) { selectedCountry = found; flyToFeature(found, 1.95, 1800); return; }
+
+      hudHint.textContent = t('noCountryFound');
+    }
+
+    btnGo.addEventListener('click', runSearch);
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); runSearch(); }
+    });
+
+    btnClear.addEventListener('click', () => {
+      searchInput.value = '';
+      hoveredCountry = null;
+      selectedCountry = null;
+      globe.pointOfView({ lat: 15, lng: 0, altitude: 1.8 }, 1200);
+      if (!currentTrip) {
+        hudTitle.textContent = t('globeReady');
+        hudHint.textContent = t('hudHintDefault');
+      }
+    });
+
+    if (centerGlobeBtn) {
+      centerGlobeBtn.addEventListener('click', () => {
+        pauseAutoRotate(2000);
+        globe.pointOfView({ lat: 15, lng: 0, altitude: 1.8 }, 1200);
+      });
+    }
+
+    function buildRequestPayload(userText) {
+      const selected = selectedCountry
+        ? { name: getName(selectedCountry), iso3: getISO3(selectedCountry) }
+        : null;
+
+      return {
+        userMessage: userText,
+        context: {
+          selectedCountry: selected,
+          currentTrip: currentTrip || null,
+          mode: currentTrip ? "edit_existing_trip" : "create_new_trip",
+          ui: {
+            timezone: "Europe/Rome",
+            language: currentLang
+          }
+        }
+      };
+    }
+
+    async function handleSend() {
+      const text = (chatInput.value || '').trim();
+      if (!text || isSending) return;
+
+      isSending = true;
+      chatInput.value = '';
+      addMsg('user', text);
+      setLoading(true);
+      setComposerEnabled(false);
+
+      const payload = buildRequestPayload(text);
+      addMsg(
+        'ai',
+          currentTrip
+            ? 'Sto aggiornando il viaggio…'
+            : t('generatingTrip')
+      );
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/plan`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await parseApiResponse(res);
+
+        if (!res.ok) {
+          throw new Error(data?.error || `HTTP error ${res.status}`);
+        }
+
+        if (!isValidTripPayload(data)) {
+          throw new Error('invalid_trip_payload');
+        }
+        
+        // STEP BOOKING MOCK
+        await renderTrip(data);
+
+const bookingNeeds = getBookingNeeds(text, data);
+
+showBookingSummaryForTrip(data, bookingNeeds, text);
+
+if (bookingNeeds.hotels) {
+  await loadAndShowHotelsForTrip(data);
+}
+
+if (bookingNeeds.activities) {
+  await loadAndShowActivitiesForTrip(data);
+}
+
+if (bookingNeeds.flights) {
+  await loadAndShowFlightsForTrip(data, text);
+}
+
+      } catch (err) {
+        console.error('Errore handleSend:', err);
+
+        let userMessage = t('tripGenericError');
+        const msg = String(err?.message || '').toLowerCase();
+
+        if (msg.includes('failed to fetch') || msg.includes('networkerror')) {
+          userMessage = t('backendDown');
+        } else if (msg.includes('invalid_trip_payload')) {
+          userMessage = t('tripInvalidServer');
+        } else if (err?.message && !msg.includes('http')) {
+          userMessage = "❌ " + err.message;
+        }
+
+        addMsg('ai', userMessage);
+
+      } finally {
+        setLoading(false);
+        setComposerEnabled(true);
+        isSending = false;
+        chatInput.focus();
+      }
+    }
+
+    function getBookingNeeds(userText, trip) {
+  const text = String(userText || '').toLowerCase();
+
+  const destinationCity = getTripCityForBookings(trip);
+  const destinationAirport = getAirportCodeForCity(destinationCity);
+  const tripDays = getTripDaysCount(trip);
+
+  const asksOnlyActivities =
+    text.includes('solo') &&
+    (
+      text.includes('muse') ||
+      text.includes('attività') ||
+      text.includes('attrazioni') ||
+      text.includes('parchi') ||
+      text.includes('biglietti') ||
+      text.includes('esperienze')
+    );
+
+  const asksHotel =
+    text.includes('hotel') ||
+    text.includes('albergo') ||
+    text.includes('dormire') ||
+    text.includes('pernott') ||
+    text.includes('sistemazione');
+
+  const asksActivities =
+    text.includes('muse') ||
+    text.includes('attività') ||
+    text.includes('attrazioni') ||
+    text.includes('parchi') ||
+    text.includes('biglietti') ||
+    text.includes('esperienze') ||
+    text.includes('tour') ||
+    text.includes('cosa vedere');
+
+  const asksFlights =
+  text.includes('volo') ||
+  text.includes('voli') ||
+  text.includes('aereo') ||
+  text.includes('partendo') ||
+  text.includes('partenza da') ||
+  text.includes('con partenza') ||
+  text.includes('da roma') ||
+  text.includes('da napoli') ||
+  text.includes('da milano') ||
+  text.includes('da venezia') ||
+  text.includes('da bologna') ||
+  text.includes('da firenze') ||
+  text.includes('da pisa') ||
+  text.includes('da torino') ||
+  text.includes('da genova') ||
+  text.includes('da bari') ||
+  text.includes('da catania') ||
+  text.includes('da palermo') ||
+  text.includes('da cagliari');
+
+  const isTripRequest =
+    text.includes('viaggio') ||
+    text.includes('weekend') ||
+    text.includes('itinerario') ||
+    text.includes('vacanza') ||
+    text.includes('giorni') ||
+    text.includes('giorno');
+
+  const isRomeDestination =
+    destinationCity &&
+    destinationCity.toLowerCase().includes('roma');
+
+  if (asksOnlyActivities) {
+    return {
+      hotels: false,
+      activities: true,
+      flights: false,
+    };
+  }
+
+  const shouldShowHotels =
+    asksHotel ||
+    (isTripRequest && tripDays >= 2);
+
+  const shouldShowActivities =
+    asksActivities ||
+    isTripRequest;
+
+  const shouldShowFlights =
+    asksFlights ||
+    (
+      isTripRequest &&
+      destinationAirport &&
+      destinationAirport !== 'FCO' &&
+      !isRomeDestination
+    );
+
+  return {
+    hotels: shouldShowHotels,
+    activities: shouldShowActivities,
+    flights: shouldShowFlights,
+  };
+}
+
+function getTripDaysCount(trip) {
+  if (!trip || typeof trip !== 'object') return 1;
+
+  if (Number.isFinite(trip?.summary?.days)) {
+    return Number(trip.summary.days);
+  }
+
+  if (Array.isArray(trip?.dailyPlan)) {
+    return trip.dailyPlan.length;
+  }
+
+  if (Number.isFinite(trip?.days)) {
+    return Number(trip.days);
+  }
+
+  return 1;
+}
+
+function saveBookingOptionsToCurrentTrip(type, items) {
+  if (!currentTrip || !type || !Array.isArray(items)) return;
+
+  if (!currentTrip.bookingOptions) {
+    currentTrip.bookingOptions = {
+      hotels: [],
+      activities: [],
+      flights: []
+    };
+  }
+
+  if (!Array.isArray(currentTrip.bookingOptions.hotels)) {
+    currentTrip.bookingOptions.hotels = [];
+  }
+
+  if (!Array.isArray(currentTrip.bookingOptions.activities)) {
+    currentTrip.bookingOptions.activities = [];
+  }
+
+  if (!Array.isArray(currentTrip.bookingOptions.flights)) {
+    currentTrip.bookingOptions.flights = [];
+  }
+
+  if (!["hotels", "activities", "flights"].includes(type)) return;
+
+  currentTrip.bookingOptions[type] = items;
+
+  window.currentTrip = currentTrip;
+  refreshTripPointsAfterBookingOptions();
+}
+
+function refreshTripPointsAfterBookingOptions() {
+  if (!currentTrip) return;
+
+  tripPoints = buildTripPoints(currentTrip);
+
+  const currentDay = playback?.currentDay || 1;
+
+  const visiblePoints = (tripPoints || []).filter(p =>
+    Number(p.day) === Number(currentDay) || p.isBookingOption === true
+  );
+
+  globe.pointsData(visiblePoints);
+
+  hudHint.textContent =
+    t('markers') + ': ' + visiblePoints.length + ' • ' + t('clickMarkerDetails');
+}
+
+function showBookingSummaryForTrip(trip, bookingNeeds, userText = "") {
+  if (!bookingNeeds || typeof bookingNeeds !== "object") return;
+
+  const city = getTripCityForBookings(trip);
+  const destinationAirport = getAirportCodeForCity(city);
+  const originAirport = getOriginAirportFromText(userText) || "FCO";
+
+  const rows = [];
+
+  if (bookingNeeds.hotels && city) {
+    rows.push(`🏨 Hotel a ${city}`);
+  }
+
+  if (bookingNeeds.activities && city) {
+    rows.push(`🎟️ Esperienze e biglietti a ${city}`);
+  }
+
+  if (
+    bookingNeeds.flights &&
+    originAirport &&
+    destinationAirport &&
+    originAirport !== destinationAirport
+  ) {
+    rows.push(`✈️ Voli ${originAirport} → ${destinationAirport}`);
+  }
+
+  if (rows.length === 0) return;
+
+  const div = document.createElement("div");
+  div.className = "msg ai";
+
+  const label = document.createElement("small");
+  label.textContent = "IA";
+  div.appendChild(label);
+
+  const card = document.createElement("div");
+  card.className = "booking-summary-card";
+
+  const title = document.createElement("div");
+  title.className = "booking-summary-title";
+  title.textContent = "Ho trovato opzioni prenotabili per questo viaggio:";
+  card.appendChild(title);
+
+  const list = document.createElement("div");
+  list.className = "booking-summary-list";
+
+  rows.forEach((rowText) => {
+    const row = document.createElement("div");
+    row.className = "booking-summary-row";
+    row.textContent = rowText;
+    list.appendChild(row);
+  });
+
+  card.appendChild(list);
+  div.appendChild(card);
+
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function selectBookingOption(type, itemId) {
+  if (!currentTrip || !currentTrip.bookingOptions) return;
+
+  const validTypes = ["hotels", "activities", "flights"];
+  if (!validTypes.includes(type)) return;
+
+  const list = currentTrip.bookingOptions[type];
+  if (!Array.isArray(list)) return;
+
+  currentTrip.bookingOptions[type] = list.map((item) => ({
+    ...item,
+    status: item.id === itemId ? "selected" : "suggested"
+  }));
+
+  window.currentTrip = currentTrip;
+
+  const selectedItem = currentTrip.bookingOptions[type].find(item => item.id === itemId);
+  const selectedTitle =
+    selectedItem?.title ||
+    selectedItem?.airline ||
+    selectedItem?.name ||
+    "opzione";
+
+  addMsg("ai", `✅ Ho selezionato: ${selectedTitle}`);
+}
+
+
+    async function loadAndShowHotelsForTrip(trip) {
+  try {
+    const city = getTripCityForBookings(trip);
+
+    if (!city) {
+      console.warn("Nessuna città trovata per ricerca hotel.");
+      return;
+    }
+
+    const url = `${API_BASE_URL}/api/bookings/hotels?city=${encodeURIComponent(city)}&adults=2`;
+
+    const res = await fetch(url);
+    const data = await parseApiResponse(res);
+
+    if (!res.ok) {
+      console.warn("Errore ricerca hotel:", data);
+      return;
+    }
+
+    if (!data?.hotels || !Array.isArray(data.hotels) || data.hotels.length === 0) {
+      addMsg("ai", "🏨 Non ho trovato hotel disponibili per questa destinazione.");
+      return;
+    }
+
+    saveBookingOptionsToCurrentTrip("hotels", data.hotels);
+    showHotelCardsInChat(data.hotels);
+
+  } catch (err) {
+    console.error("Errore loadAndShowHotelsForTrip:", err);
+  }
+}
+
+async function loadAndShowActivitiesForTrip(trip) {
+  try {
+    const city = getTripCityForBookings(trip);
+
+    if (!city) {
+      console.warn("Nessuna città trovata per ricerca attività.");
+      return;
+    }
+
+    const url = `${API_BASE_URL}/api/bookings/activities?city=${encodeURIComponent(city)}&travelers=2`;
+
+    const res = await fetch(url);
+    const data = await parseApiResponse(res);
+
+    if (!res.ok) {
+      console.warn("Errore ricerca attività:", data);
+      return;
+    }
+
+    if (!data?.activities || !Array.isArray(data.activities) || data.activities.length === 0) {
+      addMsg("ai", "🎟️ Non ho trovato attività prenotabili per questa destinazione.");
+      return;
+    }
+
+    saveBookingOptionsToCurrentTrip("activities", data.activities);
+    showActivityCardsInChat(data.activities);
+
+  } catch (err) {
+    console.error("Errore loadAndShowActivitiesForTrip:", err);
+  }
+}
+
+async function loadAndShowFlightsForTrip(trip, userText = "") {
+  try {
+    const destinationCity = getTripCityForBookings(trip);
+    const airportTo = getAirportCodeForCity(destinationCity);
+    const airportFrom = getOriginAirportFromText(userText) || "FCO";
+
+    if (airportTo === airportFrom) {
+  return;
+}
+
+    if (!airportTo) {
+      console.warn("Nessun aeroporto trovato per ricerca voli.");
+      return;
+    }
+
+    const url = `${API_BASE_URL}/api/bookings/flights?from=${encodeURIComponent(airportFrom)}&to=${encodeURIComponent(airportTo)}&travelers=2`;
+
+    const res = await fetch(url);
+    const data = await parseApiResponse(res);
+
+    if (!res.ok) {
+      console.warn("Errore ricerca voli:", data);
+      return;
+    }
+
+    if (!data?.flights || !Array.isArray(data.flights) || data.flights.length === 0) {
+      addMsg("ai", "✈️ Non ho trovato voli disponibili per questa destinazione.");
+      return;
+    }
+
+    saveBookingOptionsToCurrentTrip("flights", data.flights);
+    showFlightCardsInChat(data.flights);
+  } catch (err) {
+    console.error("Errore loadAndShowFlightsForTrip:", err);
+  }
+}
+
+function getTripCityForBookings(trip) {
+  if (!trip || typeof trip !== 'object') return '';
+
+  // 1. Prima priorità: dailyPlan, perché è la struttura reale del tuo viaggio
+  if (Array.isArray(trip.dailyPlan)) {
+    for (const day of trip.dailyPlan) {
+      if (typeof day.city === 'string' && day.city.trim()) {
+        return day.city.trim();
+      }
+
+      if (typeof day.title === 'string' && day.title.trim()) {
+        const title = day.title.toLowerCase();
+
+        if (title.includes('parigi')) return 'Parigi';
+        if (title.includes('roma')) return 'Roma';
+        if (title.includes('londra')) return 'Londra';
+        if (title.includes('madrid')) return 'Madrid';
+        if (title.includes('barcellona')) return 'Barcellona';
+      }
+
+      if (Array.isArray(day.items)) {
+        for (const item of day.items) {
+          if (typeof item.city === 'string' && item.city.trim()) {
+            return item.city.trim();
+          }
+
+          const itemText = [
+            item.title,
+            item.name,
+            item.location,
+            item.notes
+          ].filter(Boolean).join(' ').toLowerCase();
+
+          if (itemText.includes('parigi')) return 'Parigi';
+          if (itemText.includes('roma')) return 'Roma';
+          if (itemText.includes('londra')) return 'Londra';
+          if (itemText.includes('madrid')) return 'Madrid';
+          if (itemText.includes('barcellona')) return 'Barcellona';
+        }
+      }
+    }
+  }
+
+  // 2. Campi diretti
+  const directFields = [
+    trip.city,
+    trip.mainCity,
+    trip.location,
+    trip.destinationCity
+  ];
+
+  for (const value of directFields) {
+    if (typeof value === 'string' && value.trim()) {
+      return value.trim();
+    }
+  }
+
+  // 3. destination stringa o oggetto
+  if (typeof trip.destination === 'string' && trip.destination.trim()) {
+    const dest = trip.destination.trim();
+
+    if (dest.toLowerCase() !== 'italia' && dest.toLowerCase() !== 'francia') {
+      return dest;
+    }
+  }
+
+  if (trip.destination && typeof trip.destination === 'object') {
+    const destinationFields = [
+      trip.destination.city,
+      trip.destination.name,
+      trip.destination.town,
+      trip.destination.label
+    ];
+
+    for (const value of destinationFields) {
+      if (typeof value === 'string' && value.trim()) {
+        return value.trim();
+      }
+    }
+  }
+
+  // 4. Titolo viaggio
+  if (typeof trip.tripTitle === 'string' && trip.tripTitle.trim()) {
+    const title = trip.tripTitle.toLowerCase();
+
+    if (title.includes('parigi')) return 'Parigi';
+    if (title.includes('roma')) return 'Roma';
+    if (title.includes('londra')) return 'Londra';
+    if (title.includes('madrid')) return 'Madrid';
+    if (title.includes('barcellona')) return 'Barcellona';
+  }
+
+  if (typeof trip.title === 'string' && trip.title.trim()) {
+    const title = trip.title.toLowerCase();
+
+    if (title.includes('parigi')) return 'Parigi';
+    if (title.includes('roma')) return 'Roma';
+    if (title.includes('londra')) return 'Londra';
+    if (title.includes('madrid')) return 'Madrid';
+    if (title.includes('barcellona')) return 'Barcellona';
+  }
+
+  // 5. Ultima possibilità: JSON completo
+  // IMPORTANTE: Parigi prima di Roma, perché Roma può comparire come città di partenza.
+  const raw = JSON.stringify(trip).toLowerCase();
+
+  if (raw.includes('parigi')) return 'Parigi';
+  if (raw.includes('londra')) return 'Londra';
+  if (raw.includes('madrid')) return 'Madrid';
+  if (raw.includes('barcellona')) return 'Barcellona';
+  if (raw.includes('roma')) return 'Roma';
+
+  return '';
+}
+
+function getAirportCodeForCity(city) {
+  if (!city || typeof city !== "string") return "";
+
+  const normalized = city.trim().toLowerCase();
+
+  const airportMap = {
+    roma: "FCO",
+    rome: "FCO",
+    parigi: "CDG",
+    paris: "CDG",
+    londra: "LHR",
+    london: "LHR",
+    madrid: "MAD",
+    barcellona: "BCN",
+    barcelona: "BCN",
+    berlino: "BER",
+    berlin: "BER",
+    amsterdam: "AMS",
+    lisbona: "LIS",
+    lisbon: "LIS",
+    vienna: "VIE",
+    praga: "PRG",
+    athens: "ATH",
+    atene: "ATH"
+  };
+
+  return airportMap[normalized] || "";
+}
+function getOriginAirportFromText(userText) {
+  const text = String(userText || "").toLowerCase();
+
+  const originPatterns = [
+    { patterns: ["partendo da roma", "partenza da roma", "da roma", "da fiumicino"], airport: "FCO" },
+    { patterns: ["partendo da milano", "partenza da milano", "da milano", "da malpensa"], airport: "MXP" },
+    { patterns: ["partendo da napoli", "partenza da napoli", "da napoli", "da capodichino"], airport: "NAP" },
+    { patterns: ["partendo da venezia", "partenza da venezia", "da venezia", "da marco polo"], airport: "VCE" },
+    { patterns: ["partendo da bologna", "partenza da bologna", "da bologna"], airport: "BLQ" },
+    { patterns: ["partendo da firenze", "partenza da firenze", "da firenze"], airport: "FLR" },
+    { patterns: ["partendo da pisa", "partenza da pisa", "da pisa"], airport: "PSA" },
+    { patterns: ["partendo da torino", "partenza da torino", "da torino"], airport: "TRN" },
+    { patterns: ["partendo da genova", "partenza da genova", "da genova"], airport: "GOA" },
+    { patterns: ["partendo da bari", "partenza da bari", "da bari"], airport: "BRI" },
+    { patterns: ["partendo da catania", "partenza da catania", "da catania"], airport: "CTA" },
+    { patterns: ["partendo da palermo", "partenza da palermo", "da palermo"], airport: "PMO" },
+    { patterns: ["partendo da cagliari", "partenza da cagliari", "da cagliari"], airport: "CAG" }
+  ];
+
+  for (const item of originPatterns) {
+    if (item.patterns.some(pattern => text.includes(pattern))) {
+      return item.airport;
+    }
+  }
+
+  return "";
+}
+
+function showHotelCardsInChat(hotels) {
+  if (!Array.isArray(hotels) || hotels.length === 0) return;
+
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+
+  const label = document.createElement('small');
+  label.textContent = 'IA';
+  div.appendChild(label);
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'booking-results';
+
+  const title = document.createElement('div');
+  title.className = 'booking-results-title';
+  title.textContent = 'Hotel consigliati';
+  wrapper.appendChild(title);
+
+  hotels.forEach((hotel) => {
+    const card = document.createElement('div');
+    card.className = 'booking-card booking-card-hotel';
+
+    const cardTitle = document.createElement('div');
+    cardTitle.className = 'booking-card-title';
+    cardTitle.textContent = `🏨 ${hotel.title || 'Hotel'}`;
+
+    const meta = document.createElement('div');
+    meta.className = 'booking-card-meta';
+
+    const price = hotel?.price?.label || 'Prezzo non disponibile';
+    const rating = hotel.rating ? `⭐ ${hotel.rating}` : '⭐ N/D';
+    meta.textContent = `${price} · ${rating}`;
+
+    const notes = document.createElement('div');
+    notes.className = 'booking-card-notes';
+    notes.textContent = hotel.notes || '';
+
+    const actions = document.createElement('div');
+actions.className = 'booking-card-actions';
+
+const selectBtn = document.createElement('button');
+selectBtn.className = 'booking-card-btn booking-card-select-btn';
+selectBtn.type = 'button';
+selectBtn.textContent = hotel.status === "selected" ? 'Selezionato' : 'Seleziona hotel';
+
+selectBtn.addEventListener('click', () => {
+  selectBookingOption("hotels", hotel.id);
+  selectBtn.textContent = 'Selezionato';
+  selectBtn.classList.add('selected');
+});
+
+const btn = document.createElement('button');
+btn.className = 'booking-card-btn';
+btn.type = 'button';
+btn.textContent = 'Prenota';
+
+btn.addEventListener('click', () => {
+  if (hotel.bookingUrl) {
+    window.open(hotel.bookingUrl, '_blank');
+  }
+});
+
+actions.appendChild(selectBtn);
+actions.appendChild(btn);
+
+card.appendChild(cardTitle);
+card.appendChild(meta);
+card.appendChild(notes);
+card.appendChild(actions);
+
+    wrapper.appendChild(card);
+  });
+
+  div.appendChild(wrapper);
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function showActivityCardsInChat(activities) {
+  if (!Array.isArray(activities) || activities.length === 0) return;
+
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+
+  const label = document.createElement('small');
+  label.textContent = 'IA';
+  div.appendChild(label);
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'booking-results booking-results-activities';
+
+  const title = document.createElement('div');
+  title.className = 'booking-results-title';
+  title.textContent = 'Esperienze e biglietti consigliati';
+  wrapper.appendChild(title);
+
+  activities.forEach((activity) => {
+    const card = document.createElement('div');
+    card.className = 'booking-card booking-card-activity';
+
+    const cardTitle = document.createElement('div');
+    cardTitle.className = 'booking-card-title';
+
+    let icon = '🎟️';
+    if (activity.category === 'park') icon = '🌳';
+    if (activity.category === 'museum') icon = '🏛️';
+    if (activity.category === 'experience') icon = '✨';
+
+    cardTitle.textContent = `${icon} ${activity.title || 'Attività'}`;
+
+    const meta = document.createElement('div');
+    meta.className = 'booking-card-meta';
+
+    const price = activity?.price?.label || 'Prezzo non disponibile';
+    const duration = activity.duration ? ` · ${activity.duration}` : '';
+    meta.textContent = `${price}${duration}`;
+
+    const notes = document.createElement('div');
+    notes.className = 'booking-card-notes';
+    notes.textContent = activity.notes || '';
+
+    const actions = document.createElement('div');
+actions.className = 'booking-card-actions';
+
+const selectBtn = document.createElement('button');
+selectBtn.className = 'booking-card-btn booking-card-select-btn';
+selectBtn.type = 'button';
+selectBtn.textContent = activity.status === "selected" ? 'Selezionata' : 'Seleziona attività';
+
+selectBtn.addEventListener('click', () => {
+  selectBookingOption("activities", activity.id);
+  selectBtn.textContent = 'Selezionata';
+  selectBtn.classList.add('selected');
+});
+
+const btn = document.createElement('button');
+btn.className = 'booking-card-btn';
+btn.type = 'button';
+btn.textContent = 'Prenota';
+
+btn.addEventListener('click', () => {
+  if (activity.bookingUrl) {
+    window.open(activity.bookingUrl, '_blank');
+  }
+});
+
+actions.appendChild(selectBtn);
+actions.appendChild(btn);
+
+card.appendChild(cardTitle);
+card.appendChild(meta);
+card.appendChild(notes);
+card.appendChild(actions);
+
+    wrapper.appendChild(card);
+  });
+
+  div.appendChild(wrapper);
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function showFlightCardsInChat(flights) {
+  if (!Array.isArray(flights) || flights.length === 0) return;
+
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+
+  const label = document.createElement('small');
+  label.textContent = 'IA';
+  div.appendChild(label);
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'booking-results booking-results-flights';
+
+  const title = document.createElement('div');
+  title.className = 'booking-results-title';
+  title.textContent = 'Voli consigliati';
+  wrapper.appendChild(title);
+
+  flights.forEach((flight) => {
+    const card = document.createElement('div');
+    card.className = 'booking-card booking-card-flight';
+
+    const cardTitle = document.createElement('div');
+    cardTitle.className = 'booking-card-title';
+    cardTitle.textContent = `✈️ ${flight.airline || 'Compagnia'} ${flight.flightNumber || ''}`;
+
+    const route = document.createElement('div');
+    route.className = 'booking-card-meta';
+    route.textContent = `${flight.from || ''} → ${flight.to || ''} · ${flight.departureTime || '--:--'} - ${flight.arrivalTime || '--:--'}`;
+
+    const meta = document.createElement('div');
+    meta.className = 'booking-card-meta';
+
+    const price = flight?.price?.label || 'Prezzo non disponibile';
+    const duration = flight.duration ? ` · ${flight.duration}` : '';
+    const stops = flight.stops === 0 ? ' · diretto' : ` · ${flight.stops} scalo/i`;
+
+    meta.textContent = `${price}${duration}${stops}`;
+
+    const notes = document.createElement('div');
+    notes.className = 'booking-card-notes';
+    notes.textContent = flight.notes || '';
+
+    const actions = document.createElement('div');
+actions.className = 'booking-card-actions';
+
+const selectBtn = document.createElement('button');
+selectBtn.className = 'booking-card-btn booking-card-select-btn';
+selectBtn.type = 'button';
+selectBtn.textContent = flight.status === "selected" ? 'Selezionato' : 'Seleziona volo';
+
+selectBtn.addEventListener('click', () => {
+  selectBookingOption("flights", flight.id);
+  selectBtn.textContent = 'Selezionato';
+  selectBtn.classList.add('selected');
+});
+
+const btn = document.createElement('button');
+btn.className = 'booking-card-btn';
+btn.type = 'button';
+btn.textContent = 'Prenota volo';
+
+btn.addEventListener('click', () => {
+  if (flight.bookingUrl) {
+    window.open(flight.bookingUrl, '_blank');
+  }
+});
+
+actions.appendChild(selectBtn);
+actions.appendChild(btn);
+
+card.appendChild(cardTitle);
+card.appendChild(route);
+card.appendChild(meta);
+card.appendChild(notes);
+card.appendChild(actions);
+  });
+
+  div.appendChild(wrapper);
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+    
+    function clearVoiceSendTimer() {
+  if (voiceSendTimer) {
+    clearTimeout(voiceSendTimer);
+    voiceSendTimer = null;
+  }
+}
+
+function hideCancelVoiceButton() {
+  if (cancelVoiceSendBtn) {
+    cancelVoiceSendBtn.style.display = 'none';
+  }
+}
+
+function scheduleVoiceSend() {
+  clearVoiceSendTimer();
+
+  const text = (chatInput.value || '').trim();
+
+  if (!text || isSending) return;
+
+  voiceStatus.textContent =
+    'Invio tra qualche secondo... puoi ancora modificare o aggiungere qualcosa.';
+
+  if (cancelVoiceSendBtn) {
+    cancelVoiceSendBtn.style.display = 'inline-flex';
+  }
+
+  voiceSendTimer = setTimeout(() => {
+    const finalText = (chatInput.value || '').trim();
+
+    if (!finalText || isSending) return;
+
+    voiceStatus.textContent = '';
+    hideCancelVoiceButton();
+    clearVoiceSendTimer();
+
+    handleSend();
+  }, VOICE_SEND_DELAY_MS);
+}
+
+function setupVoiceCommand() {
+  if (!voiceBtn || !voiceStatus || !chatInput) return;
+
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    voiceBtn.disabled = true;
+    voiceBtn.style.opacity = '0.5';
+    voiceBtn.style.cursor = 'not-allowed';
+    voiceStatus.textContent = t('voiceNotSupported');
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+
+  recognition.lang = currentLang === 'it' ? 'it-IT' : currentLang;
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 1;
+
+  let finalVoiceText = '';
+  let hasScheduledVoiceSend = false;
+
+  recognition.onstart = () => {
+  clearVoiceSendTimer();
+  hideCancelVoiceButton();
+
+  finalVoiceText = '';
+  hasScheduledVoiceSend = false;
+
+  voiceStatus.textContent = 'Sto ascoltando...';
+  chatInput.value = '';
+  voiceBtn.textContent = '🎙️';
+  voiceBtn.classList.add('voice-listening');
+};
+
+  recognition.onresult = (event) => {
+    let interimText = '';
+
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const text = event.results[i][0].transcript;
+
+      if (event.results[i].isFinal) {
+        finalVoiceText += text;
+      } else {
+        interimText += text;
+      }
+    }
+
+    const visibleText = (finalVoiceText || interimText).trim();
+
+    if (visibleText) {
+      chatInput.value = visibleText;
+    }
+  };
+
+  recognition.onerror = (event) => {
+    console.error('Errore riconoscimento vocale:', event.error);
+
+    voiceBtn.textContent = '🎤';
+    voiceBtn.classList.remove('voice-listening');
+    hideCancelVoiceButton();
+    clearVoiceSendTimer();
+
+    if (event.error === 'not-allowed') {
+      voiceStatus.textContent =
+        'Microfono bloccato. Consenti il microfono dal browser.';
+      return;
+    }
+
+    if (event.error === 'no-speech') {
+      voiceStatus.textContent = 'Non ho sentito nulla. Riprova.';
+      return;
+    }
+
+    if (event.error === 'audio-capture') {
+      voiceStatus.textContent = 'Nessun microfono trovato.';
+      return;
+    }
+
+    voiceStatus.textContent = t('voiceError');
+  };
+
+  recognition.onend = () => {
+    voiceBtn.textContent = '🎤';
+    voiceBtn.classList.remove('voice-listening');
+
+    const text = (finalVoiceText || chatInput.value || '').trim();
+
+    if (!text) {
+      voiceStatus.textContent = 'Non ho rilevato nessun testo.';
+      hideCancelVoiceButton();
+      return;
+    }
+
+    if (!hasScheduledVoiceSend && !isSending) {
+      hasScheduledVoiceSend = true;
+      chatInput.value = text;
+      scheduleVoiceSend();
+    }
+  };
+
+  voiceBtn.addEventListener('click', async () => {
+    if (isSending) return;
+
+    try {
+      clearVoiceSendTimer();
+      hideCancelVoiceButton();
+
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const hasMicrophone = devices.some(
+        device => device.kind === 'audioinput'
+      );
+
+      if (!hasMicrophone) {
+        voiceStatus.textContent = 'Nessun microfono trovato dal browser.';
+        return;
+      }
+
+      recognition.lang = currentLang === 'it' ? 'it-IT' : currentLang;
+      recognition.start();
+
+    } catch (error) {
+      console.error('Errore avvio microfono:', error);
+      voiceStatus.textContent = 'Errore accesso microfono.';
+      voiceBtn.textContent = '🎤';
+      voiceBtn.classList.remove('voice-listening');
+    }
+  });
+}
+
+chatSend.addEventListener('click', () => {
+  clearVoiceSendTimer();
+  hideCancelVoiceButton();
+
+  voiceStatus.textContent = '';
+  handleSend();
+});
+
+saveTripBtn.addEventListener('click', saveCurrentTripManually);
+
+chatInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+
+    clearVoiceSendTimer();
+    hideCancelVoiceButton();
+
+    voiceStatus.textContent = '';
+    handleSend();
+  }
+});
+
+chatInput.addEventListener('input', () => {
+  if (voiceSendTimer) {
+    clearVoiceSendTimer();
+    hideCancelVoiceButton();
+
+    voiceStatus.textContent =
+      'Invio automatico sospeso. Premi Invia quando hai finito.';
+  }
+});
+
+if (cancelVoiceSendBtn) {
+  cancelVoiceSendBtn.addEventListener('click', () => {
+    clearVoiceSendTimer();
+    hideCancelVoiceButton();
+
+    voiceStatus.textContent =
+      'Invio automatico annullato. Premi Invia quando hai finito.';
+
+    chatInput.focus();
+  });
+}
+
+setupVoiceCommand();
+
+if (newTripBtn) {
+  newTripBtn.addEventListener('click', () => {
+    resetTrip();
+    chatInput.focus();
+  });
+}
+
+tpPlay.addEventListener('click', playTrip);
+tpPause.addEventListener('click', pauseTrip);
+
+tpPrev.addEventListener('click', () => {
+  pauseTrip();
+  const prevDay = Math.max(1, playback.currentDay - 1);
+  showDay(prevDay);
+});
+
+tpNext.addEventListener('click', () => {
+  pauseTrip();
+  const nextDay = Math.min(playback.maxDay, playback.currentDay + 1);
+  showDay(nextDay);
+});
+
+tpSlider.addEventListener('input', () => {
+  pauseTrip();
+  showDay(Number(tpSlider.value));
+});
+
+window.addEventListener('resize', () => {
+  globe.width(window.innerWidth);
+  globe.height(window.innerHeight);
+  updateTripPlayerPosition();
+});
+
+  window.addEventListener('wheel', () => {
+    globe.pointsData([].concat(globe.pointsData()));
+  }, { passive: true });
+
+    updateTripPlayerPosition();
+    applyTranslations();
+    updateAuthUI();
+    updateChatModeIndicator();
+
+    drawer.classList.remove('open');
+    savedTripsDrawer.classList.remove('open');
+
+    window.renderTrip = renderTrip;
+    window.resetTrip = resetTrip;
+  </script>
+
+  <script src="./js/app.js"></script>
+</body>
+</html>
