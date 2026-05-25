@@ -2331,7 +2331,11 @@ function getTripCityForBookings(trip) {
 function getAirportCodeForCity(city) {
   if (!city || typeof city !== "string") return "";
 
-  const normalized = city.trim().toLowerCase();
+  const normalized = city
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 
   const airportMap = {
     roma: "FCO",
@@ -2383,9 +2387,7 @@ function getAirportCodeForCity(city) {
     athens: "ATH",
 
     reykjavik: "KEF",
-    "reykjavík": "KEF",
     keflavik: "KEF",
-    "keflavík": "KEF",
     islanda: "KEF",
     iceland: "KEF"
   };
