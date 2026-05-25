@@ -1076,6 +1076,31 @@ function fixTripCountryFromUserMessage(trip, userMessage) {
     item.keywords.some((word) => text.includes(word))
   );
 
+  if (found.currency === "EUR") {
+  if (trip.summary?.budget) {
+    trip.summary.budget.currency = "EUR";
+  }
+
+  if (trip.totalEstimatedCost) {
+    trip.totalEstimatedCost.currency = "EUR";
+  }
+
+  if (Array.isArray(trip.dailyPlan)) {
+    trip.dailyPlan = trip.dailyPlan.map((day) => ({
+      ...day,
+      items: Array.isArray(day.items)
+        ? day.items.map((item) => ({
+            ...item,
+            estimatedCost:
+              typeof item.estimatedCost === "number" && item.estimatedCost > 10000
+                ? Math.round(item.estimatedCost / 150)
+                : item.estimatedCost,
+          }))
+        : [],
+    }));
+  }
+}
+
   if (!found) return trip;
 
   trip.country = {
