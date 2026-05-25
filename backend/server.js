@@ -989,6 +989,123 @@ function normalizeTrip(trip) {
   return trip;
 }
 
+function fixTripCountryFromUserMessage(trip, userMessage) {
+  if (!trip || typeof trip !== "object") return trip;
+
+  const text = String(userMessage || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  const fixes = [
+    {
+      keywords: ["islanda", "reykjavik", "keflavik"],
+      country: {
+        name: "Islanda",
+        iso3: "ISL",
+        language: "islandese",
+      },
+      currency: "EUR",
+    },
+    {
+      keywords: ["parigi", "francia", "paris"],
+      country: {
+        name: "Francia",
+        iso3: "FRA",
+        language: "francese",
+      },
+      currency: "EUR",
+    },
+    {
+      keywords: ["londra", "regno unito", "inghilterra", "london"],
+      country: {
+        name: "Regno Unito",
+        iso3: "GBR",
+        language: "inglese",
+      },
+      currency: "EUR",
+    },
+    {
+      keywords: ["madrid", "barcellona", "spagna", "barcelona"],
+      country: {
+        name: "Spagna",
+        iso3: "ESP",
+        language: "spagnolo",
+      },
+      currency: "EUR",
+    },
+    {
+      keywords: ["berlino", "germania", "berlin"],
+      country: {
+        name: "Germania",
+        iso3: "DEU",
+        language: "tedesco",
+      },
+      currency: "EUR",
+    },
+    {
+      keywords: ["amsterdam", "olanda", "paesi bassi"],
+      country: {
+        name: "Paesi Bassi",
+        iso3: "NLD",
+        language: "olandese",
+      },
+      currency: "EUR",
+    },
+    {
+      keywords: ["lisbona", "porto", "portogallo", "lisbon"],
+      country: {
+        name: "Portogallo",
+        iso3: "PRT",
+        language: "portoghese",
+      },
+      currency: "EUR",
+    },
+    {
+      keywords: ["roma", "italia", "napoli", "milano", "venezia", "firenze"],
+      country: {
+        name: "Italia",
+        iso3: "ITA",
+        language: "italiano",
+      },
+      currency: "EUR",
+    },
+  ];
+
+  const found = fixes.find((item) =>
+    item.keywords.some((word) => text.includes(word))
+  );
+
+  if (!found) return trip;
+
+  trip.country = {
+    ...(trip.country || {}),
+    ...found.country,
+  };
+
+  if (!trip.summary) trip.summary = {};
+
+  if (!trip.summary.budget) {
+    trip.summary.budget = {
+      amount: null,
+      currency: found.currency,
+    };
+  } else {
+    trip.summary.budget.currency = found.currency;
+  }
+
+  if (!trip.totalEstimatedCost) {
+    trip.totalEstimatedCost = {
+      amount: null,
+      currency: found.currency,
+    };
+  } else {
+    trip.totalEstimatedCost.currency = found.currency;
+  }
+
+  return trip;
+}
+
 // ===== Prompt =====
 function buildPlannerPrompt(userMessage, context = {}) {
   const selectedCountryText = context && context.selectedCountry
@@ -1170,6 +1287,7 @@ app.post("/api/plan", async (req, res) => {
     const parsedJson = JSON.parse(jsonText);
     const normalizedJson = normalizeTrip(parsedJson);
     const trip = TripSchema.parse(normalizedJson);
+    const trip = TripSchema.parse(fixedJson);
 
     tParse = Date.now();
     console.timeEnd("parse");
